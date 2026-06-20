@@ -1,6 +1,11 @@
 import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
+import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
+
+// Load .env / .env.local so integration tests (e.g. RLS against local Supabase) see
+// NEXT_PUBLIC_SUPABASE_URL etc. ("" prefix = load all keys, not just VITE_*).
+const env = loadEnv("test", process.cwd(), "");
 
 export default defineConfig({
   plugins: [react()],
@@ -9,6 +14,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     css: false,
+    env,
     // Unit/component tests only. Playwright owns e2e/ (added with the first real flow).
     exclude: ["node_modules", ".next", "e2e"],
   },

@@ -4,8 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-The Next.js app has been **scaffolded** (build-sequence step 1). The skeleton boots, builds, lints,
-typechecks, and has a passing test harness; feature work (Supabase tables + RLS onward) is next.
+Build-sequence steps 1–2 are done: the Next.js app is **scaffolded** and the **Supabase schema
+(`profiles` + `log_entries`) with owner-scoped RLS** is migrated and tested on a local stack. The
+app boots/builds/lints/typechecks; the test suite (smoke + RLS isolation) is green. Next is
+build-sequence step 3 (auth flows: register/login/forgot-password).
 
 **Use the `kinly-dev` skill for all development work here** (`.claude/skills/kinly-dev/`) — it carries
 the workflow, security checklist, testing strategy, and architecture rules in depth.
@@ -61,7 +63,27 @@ corepack pnpm test <pattern> # run a single test file, e.g. `pnpm test periodIns
 "Done" means `typecheck && lint && test` all pass. Run the **full** `test` before declaring anything
 complete. Playwright (e2e + mobile-viewport) is added with the first real user flow; specs live in `e2e/`.
 
-Supabase schema lives under `supabase/migrations/` (e.g. `0001_init.sql`); apply via the Supabase CLI.
+### Local Supabase
+
+The CLI is a dev dependency, run via Corepack. Schema lives in `supabase/migrations/`.
+
+```bash
+corepack pnpm exec supabase start            # boot the local stack (Docker)
+corepack pnpm exec supabase status           # URLs + keys (local demo keys, non-secret)
+corepack pnpm exec supabase migration new <name>   # create a migration file
+corepack pnpm exec supabase db reset         # re-apply all migrations to a fresh local DB
+corepack pnpm exec supabase gen types typescript --local > lib/types/database.ts
+corepack pnpm exec supabase db advisors --local --type all --level info --fail-on none
+```
+
+**Windows/Docker note:** `storage` and `analytics` are disabled in `supabase/config.toml`
+because their containers fail health checks here (analytics needs the Docker daemon on
+tcp://localhost:2375; storage was flaky). Neither is needed for current work — re-enable
+`storage` when Phase 2 report uploads begin. `db reset` can also be flaky on the older
+local Docker; if it errors mid-run, recover with `supabase stop --no-backup && supabase start`.
+
+`.env.local` holds the local keys (gitignored); copy `.env.example` and fill from `supabase status`.
+Connect from app code via `lib/supabase/client.ts` (browser) and `lib/supabase/server.ts` (server).
 
 **pnpm build-scripts note:** `pnpm-workspace.yaml` sets `allowBuilds: { sharp: false, unrs-resolver:
 false }` (we intentionally skip those native builds — Next falls back fine) and

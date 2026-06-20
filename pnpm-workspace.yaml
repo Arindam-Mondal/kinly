@@ -4,6 +4,9 @@
 allowBuilds:
   sharp: false
   unrs-resolver: false
+  # supabase CLI postinstall downloads its platform binary — must run.
+  supabase: true
+  esbuild: true
 
 # Don't auto-run `install` before every `pnpm <script>` — keeps script exit codes
 # clean and decoupled from the build-approval notice above.
