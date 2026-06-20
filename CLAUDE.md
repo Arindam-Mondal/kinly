@@ -4,18 +4,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Build-sequence steps 1–3 are done: the Next.js app is **scaffolded**, the **Supabase schema
-(`profiles` + `log_entries`) with owner-scoped RLS** is migrated and tested, and the **auth flows**
-(register / login / forgot-password / reset-password / sign-out) are built and gated by middleware.
-The app boots/builds/lints/typechecks; the test suite (validation, password strength, register form,
-RLS isolation, profile trigger) is green. Next is build-sequence step 4 (the domain-agnostic Calendar
-component).
+Build-sequence steps 1–4 are done. The app boots/builds/lints/typechecks and the full test suite
+(48 tests) is green.
+
+- **Step 1 — scaffold:** Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4, pnpm via Corepack.
+- **Step 2 — schema:** `profiles` + generic `log_entries` with owner-scoped RLS, on a local Supabase stack.
+- **Step 3 — auth:** register / login / forgot-password / reset-password / sign-out, gated by middleware.
+- **Step 4 — Calendar:** domain-agnostic `components/calendar/Calendar.tsx` (tap-to-select range
+  state machine in `calendarUtils.ts`) mounted at `/calendar`; completing a range opens a bottom-sheet
+  confirm that **inserts** a period via the `createPeriodEntry` Server Action. Also: the
+  "Organic Olive" design system (see `references/ui.md`) and the app shell (`components/app/AppHeader`,
+  `BottomNav`) with placeholder Home/Insights/Notes/Settings screens.
+
+**▶ Resume here — next is build-sequence steps 5–6:**
+- **Step 5:** edit & delete existing logged periods (tap a logged day → day-detail/edit sheet). Right
+  now periods can only be *created*, not edited/removed.
+- **Step 6:** the prediction engine — `lib/domains/period/periodInsights.ts` (pure, tested: avg cycle
+  length, predicted next start, delay/skip flags per tech spec §6) — then render predicted ranges on
+  the Calendar (the `predicted` style already exists in `periodConfig.ts`) and feed the Home dashboard.
+
+**To run locally** (full steps in `HOW_TO_RUN.md`): `corepack pnpm exec supabase start`, then
+`corepack pnpm dev` → http://localhost:3000. `.env.local` already holds the local keys.
+
+**Uncommitted work:** step 4 may be uncommitted on `main` — run `git status` first; commit it (no
+`Co-Authored-By` trailer — user preference) before starting new work.
 
 **Auth approach (decided):** email confirmation is OFF (auto-confirm — `config.toml`
 `auth.email.enable_confirmations = false`); the `profiles` row is created by the `handle_new_user`
 DB trigger from sign-up metadata, not by client code. Both are switchable later without app changes.
 Auth logic lives in `app/(auth)/actions.ts` (Server Actions) with Zod validation reused client+server
 (`lib/validation/auth.ts`); session refresh + route gating is in `middleware.ts`.
+
+**Calendar approach (decided):** week starts Sunday; future dates aren't selectable (can't log a
+period that hasn't happened). The `Calendar` component is domain-agnostic — period specifics live in
+`lib/domains/period/` and `app/(app)/calendar/`. Selection is controlled by the page so it can be
+cleared on save/cancel.
 
 **Use the `kinly-dev` skill for all development work here** (`.claude/skills/kinly-dev/`) — it carries
 the workflow, security checklist, testing strategy, and architecture rules in depth.

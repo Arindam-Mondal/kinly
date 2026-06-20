@@ -1,12 +1,30 @@
-import { CalendarDays } from "lucide-react";
-import { ComingSoon } from "@/components/app/ComingSoon";
+import { redirect } from "next/navigation";
+import type { CalendarEntry } from "@/lib/types/calendar";
+import { PERIOD_STYLE_LOGGED } from "@/lib/domains/period/periodConfig";
+import { createClient } from "@/lib/supabase/server";
+import { CalendarView } from "./CalendarView";
 
-export default function CalendarPage() {
-  return (
-    <ComingSoon
-      Icon={CalendarDays}
-      title="Calendar"
-      description="Tap to log a period range, add day notes, and see predicted dates at a glance."
-    />
-  );
+// Fetches the user's logged periods (RLS scopes to their own rows) and hands them to
+// the interactive client view.
+export default async function CalendarPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data } = await supabase
+    .from("log_entries")
+    .select("id, start_date, end_date")
+    .eq("domain", "period")
+    .order("start_date", { ascending: true });
+
+  const entries: CalendarEntry[] = (data ?? []).map((row) => ({
+    id: row.id,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    styleKey: PERIOD_STYLE_LOGGED,
+  }));
+
+  return <CalendarView entries={entries} />;
 }

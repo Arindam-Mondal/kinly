@@ -15,6 +15,10 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     css: false,
     env,
+    // Integration tests hit the local Supabase stack; give them headroom so they
+    // don't flake under parallel load (the unit tests finish well within this).
+    testTimeout: 20_000,
+    hookTimeout: 30_000,
     // Unit/component tests only. Playwright owns e2e/ (added with the first real flow).
     exclude: ["node_modules", ".next", "e2e"],
   },
