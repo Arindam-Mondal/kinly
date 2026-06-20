@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinly — System Architecture Reference</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161922;
+    --panel-light: #1c2030;
+    --border: #2a2f3e;
+    --text: #e6e8ef;
+    --text-dim: #9098ad;
+    --text-faint: #5c6378;
+    --accent-client: #7eb6ff;
+    --accent-server: #b794f6;
+    --accent-data: #f6a85c;
+    --accent-async: #5cd6b0;
+    --accent-future: #6b7280;
+    --mono: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    padding: 24px 16px 80px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.page-head {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-data);
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .subhead {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 720px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  .meta-row span b { color: var(--text-dim); font-weight: 600; }
+
+  section.block { margin-bottom: 48px; }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+
+  .diagram-frame {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+
+  svg { display: block; width: 100%; height: auto; min-width: 760px; }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+
+  .legend-swatch {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 760px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .card ul { list-style: none; }
+  .card li {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    padding: 4px 0 4px 16px;
+    position: relative;
+  }
+  .card li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--text-faint);
+  }
+  .card code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: var(--panel-light);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--accent-data);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 13.5px;
+  }
+
+  th {
+    text-align: left;
+    background: var(--panel-light);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.col-1 { color: var(--text); font-weight: 600; white-space: nowrap; }
+  td code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--panel-light);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--accent-client);
+  }
+
+  .note-box {
+    background: var(--panel-light);
+    border-left: 3px solid var(--accent-future);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin-top: 16px;
+  }
+  .note-box b { color: var(--text); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 56px;
+    padding-top: 20px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="eyebrow">Architecture Reference · Build Input for Claude Code</div>
+    <h1>Kinly — System Architecture</h1>
+    <p class="subhead">Health &amp; cycle tracker PWA. Reference companion to the PRD — covers request flow, data layer, sync behavior, and the extension points for AI report analysis and future family-account linking.</p>
+    <div class="meta-row">
+      <span>Stack: <b>Next.js (App Router) + Supabase</b></span>
+      <span>Version: <b>1.0</b></span>
+      <span>Date: <b>June 20, 2026</b></span>
+    </div>
+  </header>
+
+  <!-- ============ DIAGRAM 1: HIGH-LEVEL SYSTEM ============ -->
+  <section class="block">
+    <h2><span class="num">01</span> High-Level System Map</h2>
+    <div class="diagram-frame">
+<svg viewBox="0 0 1140 640" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#5c6378"/>
+    </marker>
+    <marker id="arrowAsync" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#5cd6b0"/>
+    </marker>
+  </defs>
+
+  <!-- CLIENT LAYER -->
+  <rect x="20" y="20" width="1100" height="110" rx="10" fill="none" stroke="#2a2f3e" stroke-dasharray="4 4"/>
+  <text x="36" y="42" fill="#5c6378" font-family="monospace" font-size="11" letter-spacing="1">CLIENT — BROWSER / INSTALLED PWA</text>
+
+  <rect x="40" y="55" width="220" height="62" rx="8" fill="#161922" stroke="#7eb6ff" stroke-width="1.5"/>
+  <text x="150" y="80" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Next.js App (Client)</text>
+  <text x="150" y="98" fill="#9098ad" font-size="11" text-anchor="middle">React UI · Calendar · Charts</text>
+
+  <rect x="290" y="55" width="200" height="62" rx="8" fill="#161922" stroke="#7eb6ff" stroke-width="1.5"/>
+  <text x="390" y="80" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Service Worker</text>
+  <text x="390" y="98" fill="#9098ad" font-size="11" text-anchor="middle">Offline cache · Write queue</text>
+
+  <rect x="520" y="55" width="220" height="62" rx="8" fill="#161922" stroke="#7eb6ff" stroke-width="1.5"/>
+  <text x="630" y="80" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Supabase JS Client</text>
+  <text x="630" y="98" fill="#9098ad" font-size="11" text-anchor="middle">Auth session · Realtime sub</text>
+
+  <rect x="780" y="55" width="320" height="62" rx="8" fill="#161922" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="940" y="80" fill="#9098ad" font-size="13" font-weight="600" text-anchor="middle">Push Notifications (Phase 2)</text>
+  <text x="940" y="98" fill="#5c6378" font-size="11" text-anchor="middle">Web Push API</text>
+
+  <!-- arrows down -->
+  <line x1="150" y1="117" x2="150" y2="155" stroke="#5c6378" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="630" y1="117" x2="630" y2="155" stroke="#5c6378" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- APP SERVER LAYER -->
+  <rect x="20" y="160" width="1100" height="150" rx="10" fill="none" stroke="#2a2f3e" stroke-dasharray="4 4"/>
+  <text x="36" y="182" fill="#5c6378" font-family="monospace" font-size="11" letter-spacing="1">APPLICATION SERVER — NEXT.JS (NODE RUNTIME)</text>
+
+  <rect x="40" y="196" width="260" height="95" rx="8" fill="#161922" stroke="#b794f6" stroke-width="1.5"/>
+  <text x="170" y="218" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Server Components / Pages</text>
+  <text x="170" y="236" fill="#9098ad" font-size="11" text-anchor="middle">SSR dashboard, insights</text>
+  <text x="170" y="252" fill="#9098ad" font-size="11" text-anchor="middle">data fetch via Supabase</text>
+  <text x="170" y="270" fill="#9098ad" font-size="11" text-anchor="middle">server client</text>
+
+  <rect x="320" y="196" width="260" height="95" rx="8" fill="#161922" stroke="#b794f6" stroke-width="1.5"/>
+  <text x="450" y="218" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Route Handlers /api/*</text>
+  <text x="450" y="236" fill="#9098ad" font-size="11" text-anchor="middle">CRUD for log_entries,</text>
+  <text x="450" y="252" fill="#9098ad" font-size="11" text-anchor="middle">prediction engine,</text>
+  <text x="450" y="270" fill="#9098ad" font-size="11" text-anchor="middle">export, report upload</text>
+
+  <rect x="600" y="196" width="260" height="95" rx="8" fill="#161922" stroke="#b794f6" stroke-width="1.5"/>
+  <text x="730" y="218" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Server Actions</text>
+  <text x="730" y="236" fill="#9098ad" font-size="11" text-anchor="middle">Form mutations</text>
+  <text x="730" y="252" fill="#9098ad" font-size="11" text-anchor="middle">(save period, add note,</text>
+  <text x="730" y="270" fill="#9098ad" font-size="11" text-anchor="middle">update profile)</text>
+
+  <rect x="880" y="196" width="220" height="95" rx="8" fill="#161922" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="990" y="218" fill="#9098ad" font-size="13" font-weight="600" text-anchor="middle">AI Report Route</text>
+  <text x="990" y="236" fill="#5c6378" font-size="11" text-anchor="middle">/api/reports/analyze</text>
+  <text x="990" y="252" fill="#5c6378" font-size="11" text-anchor="middle">enqueues job, returns</text>
+  <text x="990" y="270" fill="#5c6378" font-size="11" text-anchor="middle">202 immediately (Phase 2)</text>
+
+  <!-- arrows down to supabase -->
+  <line x1="170" y1="291" x2="170" y2="335" stroke="#5c6378" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="450" y1="291" x2="450" y2="335" stroke="#5c6378" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="730" y1="291" x2="730" y2="335" stroke="#5c6378" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="990" y1="291" x2="990" y2="335" stroke="#5cd6b0" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowAsync)"/>
+
+  <!-- DATA + ASYNC LAYER -->
+  <rect x="20" y="340" width="1100" height="190" rx="10" fill="none" stroke="#2a2f3e" stroke-dasharray="4 4"/>
+  <text x="36" y="362" fill="#5c6378" font-family="monospace" font-size="11" letter-spacing="1">SUPABASE PLATFORM</text>
+
+  <rect x="40" y="378" width="270" height="135" rx="8" fill="#161922" stroke="#f6a85c" stroke-width="1.5"/>
+  <text x="175" y="400" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Postgres Database</text>
+  <text x="175" y="420" fill="#9098ad" font-size="11" text-anchor="middle">profiles</text>
+  <text x="175" y="436" fill="#9098ad" font-size="11" text-anchor="middle">log_entries</text>
+  <text x="175" y="452" fill="#5c6378" font-size="11" text-anchor="middle">profile_links (Phase 2)</text>
+  <text x="175" y="468" fill="#5c6378" font-size="11" text-anchor="middle">report_analyses (Phase 2)</text>
+  <text x="175" y="492" fill="#f6a85c" font-size="10.5" text-anchor="middle">Row Level Security on every table</text>
+
+  <rect x="330" y="378" width="220" height="135" rx="8" fill="#161922" stroke="#f6a85c" stroke-width="1.5"/>
+  <text x="440" y="400" fill="#e6e8ef" font-size="13" font-weight="600" text-anchor="middle">Supabase Auth</text>
+  <text x="440" y="420" fill="#9098ad" font-size="11" text-anchor="middle">Email + password</text>
+  <text x="440" y="436" fill="#9098ad" font-size="11" text-anchor="middle">Session / JWT</text>
+  <text x="440" y="452" fill="#9098ad" font-size="11" text-anchor="middle">Password reset email</text>
+
+  <rect x="570" y="378" width="220" height="135" rx="8" fill="#161922" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="680" y="400" fill="#9098ad" font-size="13" font-weight="600" text-anchor="middle">Supabase Storage</text>
+  <text x="680" y="420" fill="#5c6378" font-size="11" text-anchor="middle">Uploaded report PDFs/images</text>
+  <text x="680" y="436" fill="#5c6378" font-size="11" text-anchor="middle">(Phase 2)</text>
+
+  <rect x="810" y="378" width="290" height="135" rx="8" fill="#161922" stroke="#5cd6b0" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="955" y="400" fill="#9098ad" font-size="13" font-weight="600" text-anchor="middle">Supabase Edge Function</text>
+  <text x="955" y="420" fill="#5c6378" font-size="11" text-anchor="middle">"analyze-report" worker</text>
+  <text x="955" y="436" fill="#5c6378" font-size="11" text-anchor="middle">picks up job → calls Claude API</text>
+  <text x="955" y="452" fill="#5c6378" font-size="11" text-anchor="middle">→ writes result to report_analyses</text>
+  <text x="955" y="468" fill="#5c6378" font-size="11" text-anchor="middle">→ Realtime notifies client</text>
+  <text x="955" y="492" fill="#5cd6b0" font-size="10.5" text-anchor="middle">(Phase 2 — async, off request path)</text>
+
+  <!-- arrow edge fn to external AI -->
+  <line x1="955" y1="513" x2="955" y2="555" stroke="#5cd6b0" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowAsync)"/>
+
+  <rect x="780" y="560" width="350" height="60" rx="8" fill="#161922" stroke="#5cd6b0" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="955" y="585" fill="#9098ad" font-size="13" font-weight="600" text-anchor="middle">Anthropic API (Claude)</text>
+  <text x="955" y="603" fill="#5c6378" font-size="11" text-anchor="middle">Report analysis / extraction (Phase 2)</text>
+
+  <!-- realtime feedback loop -->
+  <path d="M 810 445 C 700 445, 700 250, 630 117" fill="none" stroke="#5cd6b0" stroke-width="1.3" stroke-dasharray="2 4"/>
+  <text x="715" y="300" fill="#5cd6b0" font-size="10" transform="rotate(-90 715 300)">Realtime result push</text>
+
+</svg>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:#7eb6ff"></span> Client / browser layer</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#b794f6"></span> Next.js server layer</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#f6a85c"></span> Supabase data &amp; auth</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#5cd6b0"></span> Async / Phase 2 (AI report analysis)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#6b7280"></span> Phase 2 — not built in MVP</div>
+    </div>
+    <div class="note-box">
+      <b>Key principle:</b> the synchronous request path (solid grey arrows) never includes the AI call. A report upload returns immediately; the actual analysis happens in a background Edge Function and the result streams back via Supabase Realtime. This is what keeps the AI feature from turning Next.js into a "backend-heavy" bottleneck — see Section 04.
+    </div>
+  </section>
+
+  <!-- ============ DIAGRAM 2: REQUEST FLOW — LOGGING A PERIOD ============ -->
+  <section class="block">
+    <h2><span class="num">02</span> Request Flow — Logging a Period (Synchronous, MVP)</h2>
+    <div class="diagram-frame">
+<svg viewBox="0 0 1140 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#9098ad"/>
+    </marker>
+  </defs>
+
+  <g font-family="monospace" font-size="11" fill="#5c6378">
+    <text x="80" y="24">USER</text>
+    <text x="290" y="24">CALENDAR UI</text>
+    <text x="500" y="24">SERVER ACTION</text>
+    <text x="720" y="24">SUPABASE (RLS)</text>
+    <text x="940" y="24">POSTGRES</text>
+  </g>
+
+  <line x1="80" y1="34" x2="80" y2="200" stroke="#2a2f3e"/>
+  <line x1="290" y1="34" x2="290" y2="200" stroke="#2a2f3e"/>
+  <line x1="500" y1="34" x2="500" y2="200" stroke="#2a2f3e"/>
+  <line x1="720" y1="34" x2="720" y2="200" stroke="#2a2f3e"/>
+  <line x1="940" y1="34" x2="940" y2="200" stroke="#2a2f3e"/>
+
+  <line x1="80" y1="55" x2="282" y2="55" stroke="#9098ad" marker-end="url(#arrow2)"/>
+  <text x="90" y="48" fill="#9098ad" font-size="10.5">1. tap start + end date</text>
+
+  <line x1="290" y1="80" x2="290" y2="80" stroke="#9098ad"/>
+  <text x="186" y="76" fill="#5c6378" font-size="10.5" text-anchor="middle">2. confirm in bottom sheet</text>
+
+  <line x1="290" y1="100" x2="492" y2="100" stroke="#9098ad" marker-end="url(#arrow2)"/>
+  <text x="300" y="93" fill="#9098ad" font-size="10.5">3. saveLogEntry(domain:"period", start, end, notes)</text>
+
+  <line x1="500" y1="125" x2="712" y2="125" stroke="#9098ad" marker-end="url(#arrow2)"/>
+  <text x="510" y="118" fill="#9098ad" font-size="10.5">4. insert into log_entries (auth.uid() = user_id)</text>
+
+  <line x1="720" y1="148" x2="932" y2="148" stroke="#9098ad" marker-end="url(#arrow2)"/>
+  <text x="730" y="141" fill="#9098ad" font-size="10.5">5. RLS check passes → row written</text>
+
+  <line x1="940" y1="165" x2="500" y2="165" stroke="#5cd6b0" stroke-dasharray="3 3" marker-end="url(#arrow2)"/>
+  <text x="600" y="160" fill="#5cd6b0" font-size="10.5">6. recompute prediction (avg cycle, delay/skip flags)</text>
+
+  <line x1="500" y1="185" x2="80" y2="185" stroke="#9098ad" stroke-dasharray="3 3" marker-end="url(#arrow2)"/>
+  <text x="160" y="180" fill="#9098ad" font-size="10.5">7. revalidate + re-render dashboard with updated prediction</text>
+</svg>
+    </div>
+    <div class="note-box">
+      This entire flow runs inside a single Server Action / Route Handler call — no queue, no async worker. The prediction engine (Section 7.6 of the PRD) runs as plain server-side logic immediately after the insert, since it's just arithmetic over recent rows, not an AI call.
+    </div>
+  </section>
+
+  <!-- ============ DIAGRAM 3: PHASE 2 AI REPORT ANALYSIS FLOW ============ -->
+  <section class="block">
+    <h2><span class="num">03</span> Request Flow — AI Report Analysis (Phase 2, Asynchronous)</h2>
+    <div class="diagram-frame">
+<svg viewBox="0 0 1140 260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#9098ad"/>
+    </marker>
+    <marker id="arrow3g" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#5cd6b0"/>
+    </marker>
+  </defs>
+
+  <g font-family="monospace" font-size="11" fill="#5c6378">
+    <text x="60" y="24">USER</text>
+    <text x="240" y="24">/api/reports/analyze</text>
+    <text x="480" y="24">SUPABASE STORAGE + DB</text>
+    <text x="760" y="24">EDGE FUNCTION (worker)</text>
+    <text x="1010" y="24">CLAUDE API</text>
+  </g>
+
+  <line x1="60" y1="34" x2="60" y2="240" stroke="#2a2f3e"/>
+  <line x1="260" y1="34" x2="260" y2="240" stroke="#2a2f3e"/>
+  <line x1="540" y1="34" x2="540" y2="240" stroke="#2a2f3e"/>
+  <line x1="820" y1="34" x2="820" y2="240" stroke="#2a2f3e"/>
+  <line x1="1040" y1="34" x2="1040" y2="240" stroke="#2a2f3e"/>
+
+  <line x1="60" y1="55" x2="252" y2="55" stroke="#9098ad" marker-end="url(#arrow3)"/>
+  <text x="65" y="48" fill="#9098ad" font-size="10.5">1. upload report (PDF/image)</text>
+
+  <line x1="260" y1="80" x2="532" y2="80" stroke="#9098ad" marker-end="url(#arrow3)"/>
+  <text x="270" y="73" fill="#9098ad" font-size="10.5">2. store file + insert report_analyses row, status: "pending"</text>
+
+  <line x1="260" y1="100" x2="60" y2="100" stroke="#9098ad" stroke-dasharray="3 3" marker-end="url(#arrow3)"/>
+  <text x="100" y="95" fill="#9098ad" font-size="10.5">3. respond 202 Accepted immediately — no blocking</text>
+
+  <line x1="540" y1="125" x2="812" y2="125" stroke="#5cd6b0" marker-end="url(#arrow3g)"/>
+  <text x="550" y="118" fill="#5cd6b0" font-size="10.5">4. DB webhook / poll triggers Edge Function</text>
+
+  <line x1="820" y1="150" x2="1032" y2="150" stroke="#5cd6b0" marker-end="url(#arrow3g)"/>
+  <text x="830" y="143" fill="#5cd6b0" font-size="10.5">5. send extracted report text/data to Claude for analysis</text>
+
+  <line x1="1040" y1="170" x2="820" y2="170" stroke="#5cd6b0" stroke-dasharray="3 3" marker-end="url(#arrow3g)"/>
+  <text x="850" y="165" fill="#5cd6b0" font-size="10.5">6. structured findings returned</text>
+
+  <line x1="820" y1="195" x2="540" y2="195" stroke="#5cd6b0" marker-end="url(#arrow3g)"/>
+  <text x="580" y="190" fill="#5cd6b0" font-size="10.5">7. update report_analyses row, status: "complete"</text>
+
+  <line x1="540" y1="220" x2="60" y2="220" stroke="#5cd6b0" stroke-dasharray="2 3" marker-end="url(#arrow3g)"/>
+  <text x="100" y="215" fill="#5cd6b0" font-size="10.5">8. Supabase Realtime pushes update → UI shows result, no refresh needed</text>
+</svg>
+    </div>
+    <div class="note-box">
+      <b>Why this avoids "backend-heavy" problems:</b> the Next.js Route Handler in step 2–3 does almost no work — it stores the file and returns. All the slow, potentially-expensive work (steps 4–7) happens in an Edge Function that isn't tied to a user-facing HTTP request's timeout. This pattern scales the same way whether you get 10 report uploads a day or 10,000.
+    </div>
+  </section>
+
+  <!-- ============ SECTION 04: WHY NOT BACKEND HEAVY ============ -->
+  <section class="block">
+    <h2><span class="num">04</span> Why This Doesn't Become "Backend-Heavy"</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3><span class="dot" style="background:#b794f6"></span>What stays in Next.js</h3>
+        <ul>
+          <li>All UI rendering (Server + Client Components)</li>
+          <li>Auth session handling (via Supabase SSR helpers)</li>
+          <li>Fast CRUD: save period, add note, edit profile</li>
+          <li>Prediction engine (pure arithmetic, runs in milliseconds)</li>
+          <li>Kicking off a report-analysis job (fire-and-forget, &lt;1s response)</li>
+          <li>Reading job status / subscribing to the result</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="dot" style="background:#5cd6b0"></span>What moves to async workers</h3>
+        <ul>
+          <li>Calling the Claude API to analyze an uploaded report</li>
+          <li>Any future long-running batch job (e.g., monthly summary emails)</li>
+          <li>Heavy file processing (OCR, PDF parsing) ahead of the AI call</li>
+          <li>Anything that could exceed a normal HTTP request's time budget</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note-box">
+      The rule of thumb: if a task finishes in well under a second, it can live directly in a Next.js Route Handler or Server Action. If it might take seconds to minutes (an AI call almost always does), it gets handed off to an Edge Function / worker and the user-facing request returns immediately. This single pattern is what lets the same Next.js app handle both the simple CRUD of period logging and a heavier AI feature later — without needing a separate Express backend.
+    </div>
+  </section>
+
+  <!-- ============ SECTION 05: DATA MODEL ============ -->
+  <section class="block">
+    <h2><span class="num">05</span> Data Model (Postgres / Supabase)</h2>
+    <table>
+      <thead>
+        <tr><th>Table</th><th>Key columns</th><th>Purpose</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-1">profiles</td>
+          <td><code>id</code> <code>name</code> <code>age</code> <code>sex</code></td>
+          <td>1:1 with auth.users. Drives the dashboard copy branch (male = alert framing).</td>
+          <td>MVP</td>
+        </tr>
+        <tr>
+          <td class="col-1">log_entries</td>
+          <td><code>id</code> <code>user_id</code> <code>domain</code> <code>start_date</code> <code>end_date</code> <code>notes</code> <code>metadata (jsonb)</code></td>
+          <td>Generic event log. domain="period" today; "migraine" etc. later — no schema change needed.</td>
+          <td>MVP</td>
+        </tr>
+        <tr>
+          <td class="col-1">profile_links</td>
+          <td><code>owner_user_id</code> <code>linked_user_id</code> <code>relationship</code> <code>permission_level</code></td>
+          <td>Grants a linked account (e.g., a husband) read/notify access to another profile's data.</td>
+          <td>Phase 2</td>
+        </tr>
+        <tr>
+          <td class="col-1">report_analyses</td>
+          <td><code>id</code> <code>user_id</code> <code>file_path</code> <code>status</code> <code>result (jsonb)</code></td>
+          <td>Tracks an uploaded health report's analysis job and stores Claude's structured findings.</td>
+          <td>Phase 2</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note-box">
+      <b>Row Level Security</b> is enabled on every table. Base policy: a user reads/writes only rows where <code style="color:#f6a85c">user_id = auth.uid()</code>. <code style="color:#f6a85c">profile_links</code> adds a second policy layer later — granting read access to a linked profile's rows — without altering the base policy on <code style="color:#f6a85c">log_entries</code>.
+    </div>
+  </section>
+
+  <!-- ============ SECTION 06: SCALING NOTES ============ -->
+  <section class="block">
+    <h2><span class="num">06</span> Scaling Notes</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3><span class="dot" style="background:#7eb6ff"></span>App layer (Next.js)</h3>
+        <ul>
+          <li>Stateless — scales horizontally by running more instances</li>
+          <li>Static assets + cacheable pages served via CDN</li>
+          <li>Self-hostable (Docker / any cloud) if outgrowing a serverless platform's limits</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="dot" style="background:#f6a85c"></span>Data layer (Postgres)</h3>
+        <ul>
+          <li>Index <code>log_entries(user_id, domain, start_date)</code> early</li>
+          <li>Connection pooling (built into Supabase) handles high concurrent connections</li>
+          <li>Read replicas available on higher tiers if read load grows</li>
+          <li>Active concurrent load is typically far lower than total registered users for a low-frequency-logging app like this</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Kinly — Architecture Reference v1.0 — companion to PRD_Kinly_Health_Tracker_PWA.md — generated for Claude Code build handoff
+  </footer>
+
+</div>
+</body>
+</html>

@@ -40,3 +40,16 @@ desktop.ini
 coverage/
 .cache/
 .pytest_cache/
+
+# Next.js
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+.pnp.*
+.pnpm-debug.log*
+
+# Playwright (added with first e2e flow)
+/test-results/
+/playwright-report/
+/playwright/.cache/

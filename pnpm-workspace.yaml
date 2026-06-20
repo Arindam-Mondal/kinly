@@ -1,0 +1,10 @@
+# Resolve pnpm's build-script approval prompt. We intentionally skip these native
+# builds: Next falls back without sharp (fine for MVP); unrs-resolver falls back to
+# its JS resolver. Setting them explicitly stops pnpm re-prompting on every install.
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
+
+# Don't auto-run `install` before every `pnpm <script>` — keeps script exit codes
+# clean and decoupled from the build-approval notice above.
+verifyDepsBeforeRun: false
