@@ -4,10 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Build-sequence steps 1–2 are done: the Next.js app is **scaffolded** and the **Supabase schema
-(`profiles` + `log_entries`) with owner-scoped RLS** is migrated and tested on a local stack. The
-app boots/builds/lints/typechecks; the test suite (smoke + RLS isolation) is green. Next is
-build-sequence step 3 (auth flows: register/login/forgot-password).
+Build-sequence steps 1–3 are done: the Next.js app is **scaffolded**, the **Supabase schema
+(`profiles` + `log_entries`) with owner-scoped RLS** is migrated and tested, and the **auth flows**
+(register / login / forgot-password / reset-password / sign-out) are built and gated by middleware.
+The app boots/builds/lints/typechecks; the test suite (validation, password strength, register form,
+RLS isolation, profile trigger) is green. Next is build-sequence step 4 (the domain-agnostic Calendar
+component).
+
+**Auth approach (decided):** email confirmation is OFF (auto-confirm — `config.toml`
+`auth.email.enable_confirmations = false`); the `profiles` row is created by the `handle_new_user`
+DB trigger from sign-up metadata, not by client code. Both are switchable later without app changes.
+Auth logic lives in `app/(auth)/actions.ts` (Server Actions) with Zod validation reused client+server
+(`lib/validation/auth.ts`); session refresh + route gating is in `middleware.ts`.
 
 **Use the `kinly-dev` skill for all development work here** (`.claude/skills/kinly-dev/`) — it carries
 the workflow, security checklist, testing strategy, and architecture rules in depth.

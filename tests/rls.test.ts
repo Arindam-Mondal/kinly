@@ -1,74 +1,47 @@
-import {
-  type SupabaseClient,
-  createClient,
-} from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Database } from "@/lib/types/database";
+import {
+  type TestEnv,
+  type TestUser,
+  createConfirmedUser,
+  getTestEnv,
+  makeAdmin,
+} from "./helpers/users";
 
 // Integration test: proves Row Level Security isolates users from each other.
 // Requires the local Supabase stack (`supabase start`). If it isn't reachable,
 // the suite self-skips so the unit-test gate stays green without a database.
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-type Client = SupabaseClient<Database>;
-type User = { id: string; email: string; client: Client };
-
-const tag = `rls-${Date.now()}`;
-let admin: Client;
-let userA: User | null = null;
-let userB: User | null = null;
+let env: TestEnv | null;
+let admin: SupabaseClient<Database>;
+let userA: TestUser | null = null;
+let userB: TestUser | null = null;
 let setupError = "";
 
-// Create a confirmed auth user, sign in as them, and seed a profile + one period entry.
-async function makeUser(suffix: string): Promise<User> {
-  const email = `${tag}-${suffix}@example.com`;
-  const password = "password123";
-
-  const { data: created, error: createErr } =
-    await admin.auth.admin.createUser({ email, password, email_confirm: true });
-  if (createErr || !created.user) throw createErr ?? new Error("no user");
-  const id = created.user.id;
-
-  const client = createClient<Database>(url!, anonKey!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  const { error: signInErr } = await client.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (signInErr) throw signInErr;
-
-  // Insert via the authenticated client — exercises the insert_own policies.
-  const { error: profileErr } = await client
-    .from("profiles")
-    .insert({ id, name: `User ${suffix}`, email, age: 30, sex: "female" });
-  if (profileErr) throw profileErr;
-
-  const { error: entryErr } = await client.from("log_entries").insert({
-    user_id: id,
+// Seed one period entry for a user (their profile is auto-created by the trigger).
+async function seedEntry(user: TestUser) {
+  const { error } = await user.client.from("log_entries").insert({
+    user_id: user.id,
     domain: "period",
     start_date: "2026-06-01",
     end_date: "2026-06-05",
   });
-  if (entryErr) throw entryErr;
-
-  return { id, email, client };
+  if (error) throw error;
 }
 
 beforeAll(async () => {
-  if (!url || !anonKey || !serviceKey) {
+  env = getTestEnv();
+  if (!env) {
     setupError = "Supabase env not set — skipping RLS tests.";
     return;
   }
-  admin = createClient<Database>(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  admin = makeAdmin(env);
   try {
-    userA = await makeUser("a");
-    userB = await makeUser("b");
+    userA = await createConfirmedUser(env, admin, { suffix: "a" });
+    userB = await createConfirmedUser(env, admin, { suffix: "b" });
+    await seedEntry(userA);
+    await seedEntry(userB);
   } catch (err) {
     // Most likely the local stack isn't running; skip rather than fail the gate.
     setupError = `Local Supabase not reachable — skipping RLS tests. (${String(err)})`;
