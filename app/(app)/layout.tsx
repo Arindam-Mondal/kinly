@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
+import { AppHeader } from "@/components/app/AppHeader";
+import { BottomNav } from "@/components/app/BottomNav";
 
-// Shell for authenticated app screens. The bottom navigation (Home · Calendar ·
-// Insights · Notes) and top bar arrive with those screens; for now it just centers
-// content in a mobile-width column.
+// Shell for authenticated app screens: floating header, scrollable content, and the
+// fixed bottom tab bar — a mobile-width column centered on larger viewports.
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md bg-rose-50 dark:bg-neutral-950">{children}</div>
+    <div className="relative mx-auto min-h-dvh w-full max-w-md bg-canvas">
+      <AppHeader />
+      <main className="px-5 pb-28 pt-1">{children}</main>
+      <BottomNav />
+    </div>
   );
 }

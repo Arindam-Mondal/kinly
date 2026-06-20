@@ -12,14 +12,15 @@ export default async function OnboardingPage() {
   if (!user) redirect("/login");
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center p-6 text-center">
-      <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">Welcome to Kinly</h1>
-      <p className="mt-2 text-sm text-neutral-500">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center bg-canvas p-6 text-center">
+      <p className="font-display text-3xl font-semibold tracking-tight text-ink">Kinly</p>
+      <h1 className="mt-8 font-display text-2xl font-semibold text-ink">Welcome</h1>
+      <p className="mt-2 text-sm leading-relaxed text-ink/60">
         Log dates for your own cycle, or for someone you support — it works the same either way.
       </p>
       <Link
         href="/home"
-        className="mt-8 rounded-xl bg-rose-500 px-4 py-3 font-medium text-white transition hover:bg-rose-600"
+        className="mt-8 rounded-2xl bg-accent px-4 py-3 font-semibold text-ink transition-all duration-200 hover:bg-accent-strong active:scale-95"
       >
         Get started
       </Link>

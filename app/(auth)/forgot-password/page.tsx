@@ -8,8 +8,8 @@ import { type ForgotPasswordInput, forgotPasswordSchema } from "@/lib/validation
 import { forgotPasswordAction } from "../actions";
 
 const inputClass =
-  "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:border-neutral-700 dark:bg-neutral-800";
-const labelClass = "block text-sm font-medium text-neutral-700 dark:text-neutral-300";
+  "w-full rounded-2xl border border-ink/10 bg-canvas px-4 py-3 text-base text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40";
+const labelClass = "block text-sm font-medium text-ink/80";
 
 export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
@@ -36,30 +36,30 @@ export default function ForgotPasswordPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">Reset your password</h1>
-      <p className="mt-1 text-sm text-neutral-500">We&apos;ll email you a link to set a new one.</p>
+      <h1 className="font-display text-2xl font-semibold text-ink">Reset your password</h1>
+      <p className="mt-1 text-sm text-ink/60">We&apos;ll email you a link to set a new one.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
         <div>
           <label className={labelClass} htmlFor="email">Email</label>
           <input id="email" type="email" className={inputClass} autoComplete="email" {...register("email")} />
-          {errors.email && <p className="mt-1 text-sm text-rose-600">{errors.email.message}</p>}
+          {errors.email && <p className="mt-1 text-sm text-[#a8412a]">{errors.email.message}</p>}
         </div>
 
-        {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/40">{message}</p>}
-        {error && <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-950/40">{error}</p>}
+        {message && <p className="rounded-2xl bg-accent/15 p-3 text-sm text-ink">{message}</p>}
+        {error && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{error}</p>}
 
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-rose-500 px-4 py-3 font-medium text-white transition hover:bg-rose-600 disabled:opacity-60"
+          className="w-full rounded-2xl bg-accent px-4 py-3 font-semibold text-ink transition-all duration-200 hover:bg-accent-strong active:scale-95 disabled:opacity-60"
         >
           {pending ? "Sending…" : "Send reset link"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
-        <Link href="/login" className="font-medium text-rose-600">Back to log in</Link>
+      <p className="mt-6 text-center text-sm text-ink/60">
+        <Link href="/login" className="font-semibold text-ink underline decoration-accent decoration-2 underline-offset-2">Back to log in</Link>
       </p>
     </div>
   );

@@ -28,14 +28,36 @@ health software people reach for in private moments, and the tone is part of the
 - **Empty states matter:** first-time users with no data get friendly, encouraging guidance toward
   logging their first period — never a blank screen.
 
-## Visual language
+## Visual language — "Holistic Organic Olive"
 
-- Soft, warm, rounded: generous corner radii, soft shadows, a calming palette (warm pinks,
-  lavenders, soft corals, deep plums as accents). Keep it tasteful and gender-neutral — men use the
-  same screens, so avoid anything that reads as exclusively "for women."
-- **Dark mode from day one:** respects system preference by default, with a toggle in Settings.
-  Build color choices as Tailwind theme tokens so both modes come from one source.
-- Define the palette once as Tailwind theme tokens; don't hardcode hex values across components.
+The design system is luxurious, calming, and organic — premium wellness, not clinical. It lives as
+Tailwind v4 theme tokens in `app/globals.css` (`@theme`); use the semantic utilities, never scatter
+raw hex across components.
+
+| Role (rough ratio) | Token / utility | Value | Use for |
+|---|---|---|---|
+| Canvas (60%) | `bg-canvas` | `#FDFBF7` warm alabaster | page background |
+| Surface | `bg-surface` | `#F7F4EF` soft cream | cards, containers, sections (layered depth, no harsh white) |
+| Ink (30%) | `text-ink` / `border-ink/10` | `#1E3A1E` deep forest green | text, icons, structural lines |
+| Accent (10%) | `bg-accent` / `text-accent` | `#A3E635` citron/sage | **only** high-impact actions, vital metrics, active nav |
+| Accent pressed | `bg-accent-strong` | `#8FD123` | button hover/active |
+
+- **Accent is precious — 10% rule.** Citron draws the eye, so spend it only on the primary action,
+  an active nav tab, or a vital metric. Don't tint whole sections with it.
+- **Depth via tone + soft shadow, not hard lines.** Layer `bg-surface` cards on the `bg-canvas` page;
+  separate with `border-ink/10` hairlines or the warm-tinted `shadow-soft` (`shadow-lift` for raised
+  surfaces). Never heavy black drop shadows.
+- **Generous organic radii:** `rounded-3xl` for cards/sheets/CTAs, `rounded-2xl` for inputs and
+  smaller controls.
+- **Type:** Fraunces (`font-display`) — a soft "old style" serif — for the wordmark and headings,
+  used with restraint; Geist sans (default) for body and UI. Buttons on accent use `text-ink` (dark
+  on citron), which reads premium.
+- **Touch feedback everywhere:** interactive elements get `transition-all duration-200 active:scale-95`
+  for a native, high-fidelity feel.
+- The shared shell lives in `components/app/` (`AppHeader`, `BottomNav`) and is wired into
+  `app/(app)/layout.tsx`; reuse it rather than rebuilding per screen.
+- **Dark mode:** not yet implemented — the current palette is light-first per the brief. When added,
+  design a deliberate dark-olive variant via the same tokens (don't just invert), with a Settings toggle.
 
 ## Accessibility (WCAG AA minimum)
 

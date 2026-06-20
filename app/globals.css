@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ===== Kinly design system — "Holistic Organic Olive" =====
+   One source of truth for the palette; components use the semantic utilities these
+   generate (bg-canvas, text-ink, bg-accent, shadow-soft, font-display, …). */
+@theme {
+  --color-canvas: #fdfbf7; /* warm alabaster — page background */
+  --color-surface: #f7f4ef; /* soft cream — cards & containers */
+  --color-ink: #1e3a1e; /* deep forest green — text, icons, lines */
+  --color-accent: #a3e635; /* citron/sage — actions & vital metrics only */
+  --color-accent-strong: #8fd123; /* accent, pressed/hover */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --shadow-soft: 0 4px 20px -4px rgba(30, 58, 30, 0.06);
+  --shadow-lift: 0 10px 30px -10px rgba(30, 58, 30, 0.12);
+
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-fraunces);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Respect users who prefer less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

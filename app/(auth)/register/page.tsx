@@ -20,10 +20,10 @@ const SEX_LABELS: Record<(typeof SEX_VALUES)[number], string> = {
 };
 
 const inputClass =
-  "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:border-neutral-700 dark:bg-neutral-800";
-const labelClass = "block text-sm font-medium text-neutral-700 dark:text-neutral-300";
-const errorClass = "mt-1 text-sm text-rose-600";
-const strengthColors = ["bg-neutral-200", "bg-rose-400", "bg-amber-400", "bg-lime-400", "bg-emerald-500"];
+  "w-full rounded-2xl border border-ink/10 bg-canvas px-4 py-3 text-base text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40";
+const labelClass = "block text-sm font-medium text-ink/80";
+const errorClass = "mt-1 text-sm text-[#a8412a]";
+const strengthColors = ["bg-ink/15", "bg-[#a8412a]", "bg-amber-500", "bg-accent", "bg-accent-strong"];
 
 export default function RegisterPage() {
   const [formError, setFormError] = useState("");
@@ -50,8 +50,8 @@ export default function RegisterPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">Create your account</h1>
-      <p className="mt-1 text-sm text-neutral-500">Track your cycle — for yourself or someone you support.</p>
+      <h1 className="font-display text-2xl font-semibold text-ink">Create your account</h1>
+      <p className="mt-1 text-sm text-ink/60">Track your cycle — for yourself or someone you support.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
         <div>
@@ -71,10 +71,13 @@ export default function RegisterPage() {
           <input id="password" type="password" className={inputClass} autoComplete="new-password" {...register("password")} />
           <div className="mt-2 flex gap-1" aria-hidden="true">
             {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={`h-1 flex-1 rounded-full ${i < strength.score ? strengthColors[strength.score] : "bg-neutral-200 dark:bg-neutral-700"}`} />
+              <span
+                key={i}
+                className={`h-1 flex-1 rounded-full ${i < strength.score ? strengthColors[strength.score] : "bg-ink/10"}`}
+              />
             ))}
           </div>
-          <p className="mt-1 text-xs text-neutral-500">{strength.label} · at least 8 characters and a number</p>
+          <p className="mt-1 text-xs text-ink/50">{strength.label} · at least 8 characters and a number</p>
           {errors.password && <p className={errorClass}>{errors.password.message}</p>}
         </div>
 
@@ -95,20 +98,20 @@ export default function RegisterPage() {
         </div>
         {(errors.age || errors.sex) && <p className={errorClass}>{errors.age?.message ?? errors.sex?.message}</p>}
 
-        {formError && <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-950/40">{formError}</p>}
+        {formError && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{formError}</p>}
 
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-rose-500 px-4 py-3 font-medium text-white transition hover:bg-rose-600 disabled:opacity-60"
+          className="w-full rounded-2xl bg-accent px-4 py-3 font-semibold text-ink transition-all duration-200 hover:bg-accent-strong active:scale-95 disabled:opacity-60"
         >
           {pending ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="mt-6 text-center text-sm text-ink/60">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-rose-600">Log in</Link>
+        <Link href="/login" className="font-semibold text-ink underline decoration-accent decoration-2 underline-offset-2">Log in</Link>
       </p>
     </div>
   );

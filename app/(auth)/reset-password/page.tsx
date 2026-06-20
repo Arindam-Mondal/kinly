@@ -8,8 +8,8 @@ import { type ResetPasswordInput, resetPasswordSchema } from "@/lib/validation/a
 import { resetPasswordAction } from "../actions";
 
 const inputClass =
-  "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:border-neutral-700 dark:bg-neutral-800";
-const labelClass = "block text-sm font-medium text-neutral-700 dark:text-neutral-300";
+  "w-full rounded-2xl border border-ink/10 bg-canvas px-4 py-3 text-base text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40";
+const labelClass = "block text-sm font-medium text-ink/80";
 
 export default function ResetPasswordPage() {
   const [formError, setFormError] = useState("");
@@ -36,22 +36,22 @@ export default function ResetPasswordPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-50">Choose a new password</h1>
+      <h1 className="font-display text-2xl font-semibold text-ink">Choose a new password</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
         <div>
           <label className={labelClass} htmlFor="password">New password</label>
           <input id="password" type="password" className={inputClass} autoComplete="new-password" {...register("password")} />
-          <p className="mt-1 text-xs text-neutral-500">{strength.label} · at least 8 characters and a number</p>
-          {errors.password && <p className="mt-1 text-sm text-rose-600">{errors.password.message}</p>}
+          <p className="mt-1 text-xs text-ink/50">{strength.label} · at least 8 characters and a number</p>
+          {errors.password && <p className="mt-1 text-sm text-[#a8412a]">{errors.password.message}</p>}
         </div>
 
-        {formError && <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-950/40">{formError}</p>}
+        {formError && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{formError}</p>}
 
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-rose-500 px-4 py-3 font-medium text-white transition hover:bg-rose-600 disabled:opacity-60"
+          className="w-full rounded-2xl bg-accent px-4 py-3 font-semibold text-ink transition-all duration-200 hover:bg-accent-strong active:scale-95 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save new password"}
         </button>
