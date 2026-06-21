@@ -3,6 +3,8 @@
 // and insights screens need. Lives under lib/domains/period/ so the shared Calendar
 // stays domain-agnostic (architecture constraint #2/#4).
 
+import { formatMonthShort } from "@/components/calendar/calendarUtils";
+
 export type PeriodStatus =
   | "insufficient_data"
   | "on_track"
@@ -57,6 +59,24 @@ function roundedAverage(nums: number[]): number {
   return Math.round(nums.reduce((sum, n) => sum + n, 0) / nums.length);
 }
 
+// --- Shared series builders: the single source of the cycle/duration arithmetic, used by
+// both the dashboard scalars (computePeriodInsights) and the Insights trends
+// (computePeriodTrends) so the two can never drift apart. Inputs must be pre-sorted ascending. ---
+
+// Days between each consecutive pair of period starts (one fewer entry than periods).
+function cycleLengthsOf(sorted: PeriodForInsights[]): number[] {
+  const lengths: number[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    lengths.push(diffDays(sorted[i - 1].startDate, sorted[i].startDate));
+  }
+  return lengths;
+}
+
+// (end − start + 1) per period; a null end date counts as a single day.
+function durationsOf(sorted: PeriodForInsights[]): number[] {
+  return sorted.map((p) => (p.endDate ? diffDays(p.startDate, p.endDate) + 1 : 1));
+}
+
 export function computePeriodInsights(
   periods: PeriodForInsights[],
   todayISO: string,
@@ -83,21 +103,14 @@ export function computePeriodInsights(
   const currentCycleDay = diffDays(mostRecentStart, todayISO) + 1;
 
   // Average duration is meaningful from the first period; null end = single day.
-  const recentDurations = sorted
-    .slice(-ROLLING_WINDOW)
-    .map((p) => (p.endDate ? diffDays(p.startDate, p.endDate) + 1 : 1));
-  const avgPeriodDuration = roundedAverage(recentDurations);
+  const avgPeriodDuration = roundedAverage(durationsOf(sorted).slice(-ROLLING_WINDOW));
 
   // Need two periods before any cycle length / prediction exists.
   if (periodsLogged < 2) {
     return { ...base, avgPeriodDuration, mostRecentStart, currentCycleDay };
   }
 
-  const cycleLengths: number[] = [];
-  for (let i = 1; i < sorted.length; i++) {
-    cycleLengths.push(diffDays(sorted[i - 1].startDate, sorted[i].startDate));
-  }
-  const avgCycleLength = roundedAverage(cycleLengths.slice(-ROLLING_WINDOW));
+  const avgCycleLength = roundedAverage(cycleLengthsOf(sorted).slice(-ROLLING_WINDOW));
 
   const predictedNextStart = addDays(mostRecentStart, avgCycleLength);
   const predictedRangeEnd = addDays(predictedNextStart, Math.max(avgPeriodDuration - 1, 0));
@@ -114,6 +127,55 @@ export function computePeriodInsights(
     daysUntilPredicted: -daysSincePredicted,
     daysSincePredicted,
     status: classify(daysSincePredicted, avgCycleLength),
+  };
+}
+
+// How many points each Insights trend chart shows (tech spec §5.6: "last 6–12"). The
+// average lines still use the rolling-6 window above, so they match the dashboard exactly.
+const CHART_WINDOW = 12;
+
+export type TrendPoint = { label: string; value: number };
+
+export type PeriodTrends = {
+  cycles: TrendPoint[]; // last ≤12 cycle lengths, labelled by the period that closes the cycle
+  durations: TrendPoint[]; // last ≤12 period durations, labelled by each period's start
+  avgCycleLength: number | null; // rolling-6 average (== dashboard)
+  avgPeriodDuration: number | null; // rolling-6 average (== dashboard)
+  shortestCycle: number | null; // over all recorded cycles
+  longestCycle: number | null;
+  totalCycles: number; // count of logged periods
+};
+
+// Derived series + stats for the Insights screen. Pure, no I/O. Reuses the same
+// cycle/duration arithmetic as computePeriodInsights via the shared builders above so the
+// numbers shown on Insights and Home can never disagree (tech spec §5.6).
+export function computePeriodTrends(periods: PeriodForInsights[]): PeriodTrends {
+  const sorted = [...periods].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const totalCycles = sorted.length;
+
+  const allCycleLengths = cycleLengthsOf(sorted);
+  const allDurations = durationsOf(sorted);
+
+  // Each cycle length sits between two periods; label it with the later period's start.
+  const cycles: TrendPoint[] = allCycleLengths
+    .map((value, i) => ({ label: formatMonthShort(sorted[i + 1].startDate), value }))
+    .slice(-CHART_WINDOW);
+  const durations: TrendPoint[] = allDurations
+    .map((value, i) => ({ label: formatMonthShort(sorted[i].startDate), value }))
+    .slice(-CHART_WINDOW);
+
+  return {
+    cycles,
+    durations,
+    avgCycleLength: allCycleLengths.length
+      ? roundedAverage(allCycleLengths.slice(-ROLLING_WINDOW))
+      : null,
+    avgPeriodDuration: allDurations.length
+      ? roundedAverage(allDurations.slice(-ROLLING_WINDOW))
+      : null,
+    shortestCycle: allCycleLengths.length ? Math.min(...allCycleLengths) : null,
+    longestCycle: allCycleLengths.length ? Math.max(...allCycleLengths) : null,
+    totalCycles,
   };
 }
 

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { type PeriodForInsights, computePeriodInsights } from "./periodInsights";
+import {
+  type PeriodForInsights,
+  computePeriodInsights,
+  computePeriodTrends,
+} from "./periodInsights";
 
 // Helper: build a list of periods from {start, durationDays} so tests read clearly.
 function period(start: string, durationDays: number): PeriodForInsights {
@@ -112,5 +116,98 @@ describe("computePeriodInsights", () => {
     const r = computePeriodInsights([period("2026-06-01", 5), period("2026-05-04", 5)], "2026-06-10");
     expect(r.avgCycleLength).toBe(28);
     expect(r.mostRecentStart).toBe("2026-06-01");
+  });
+});
+
+describe("computePeriodTrends", () => {
+  it("is empty with no periods", () => {
+    const t = computePeriodTrends([]);
+    expect(t.cycles).toEqual([]);
+    expect(t.durations).toEqual([]);
+    expect(t.avgCycleLength).toBeNull();
+    expect(t.avgPeriodDuration).toBeNull();
+    expect(t.shortestCycle).toBeNull();
+    expect(t.longestCycle).toBeNull();
+    expect(t.totalCycles).toBe(0);
+  });
+
+  it("with one period: a duration point but no cycle series yet", () => {
+    const t = computePeriodTrends([period("2026-06-17", 4)]);
+    expect(t.totalCycles).toBe(1);
+    expect(t.durations).toHaveLength(1);
+    expect(t.durations[0].value).toBe(4);
+    expect(t.cycles).toEqual([]);
+    expect(t.avgPeriodDuration).toBe(4);
+    expect(t.avgCycleLength).toBeNull();
+    expect(t.shortestCycle).toBeNull();
+    expect(t.longestCycle).toBeNull();
+  });
+
+  it("builds cycle + duration series, shortest/longest, and totals", () => {
+    const periods = [
+      period("2026-03-01", 5),
+      period("2026-03-30", 4), // cycle 29
+      period("2026-04-26", 6), // cycle 27
+      period("2026-05-25", 5), // cycle 29
+    ];
+    const t = computePeriodTrends(periods);
+    expect(t.totalCycles).toBe(4);
+    expect(t.cycles.map((c) => c.value)).toEqual([29, 27, 29]);
+    expect(t.durations.map((d) => d.value)).toEqual([5, 4, 6, 5]);
+    expect(t.shortestCycle).toBe(27);
+    expect(t.longestCycle).toBe(29);
+    // Each point carries a short human label derived from the period start.
+    expect(t.cycles[0].label).toMatch(/[A-Za-z]/);
+  });
+
+  it("keeps the average lines equal to the rolling-6 dashboard averages", () => {
+    // 8 periods: first gap is a 50-day outlier excluded by the rolling-6 window.
+    const gaps = [50, 28, 28, 28, 28, 28, 28];
+    const starts = ["2026-01-01"];
+    for (const g of gaps) {
+      const [y, m, d] = starts[starts.length - 1].split("-").map(Number);
+      const next = new Date(Date.UTC(y, m - 1, d + g));
+      starts.push(
+        `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(
+          next.getUTCDate(),
+        ).padStart(2, "0")}`,
+      );
+    }
+    const periods = starts.map((s) => period(s, 5));
+    const t = computePeriodTrends(periods);
+    const ins = computePeriodInsights(periods, starts[starts.length - 1]);
+    expect(t.avgCycleLength).toBe(ins.avgCycleLength);
+    expect(t.avgPeriodDuration).toBe(ins.avgPeriodDuration);
+    // The chart series itself still shows the full last-12 history, outlier included.
+    expect(t.cycles.map((c) => c.value)).toEqual([50, 28, 28, 28, 28, 28, 28]);
+    expect(t.shortestCycle).toBe(28);
+    expect(t.longestCycle).toBe(50);
+  });
+
+  it("caps each chart series at the last 12 entries", () => {
+    const starts: string[] = ["2024-01-01"];
+    for (let i = 0; i < 19; i++) {
+      const [y, m, d] = starts[starts.length - 1].split("-").map(Number);
+      const next = new Date(Date.UTC(y, m - 1, d + 28));
+      starts.push(
+        `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(
+          next.getUTCDate(),
+        ).padStart(2, "0")}`,
+      );
+    }
+    const t = computePeriodTrends(starts.map((s) => period(s, 5)));
+    expect(t.totalCycles).toBe(20);
+    expect(t.durations).toHaveLength(12);
+    expect(t.cycles).toHaveLength(12);
+  });
+
+  it("treats a null end date as a single-day period", () => {
+    const t = computePeriodTrends([{ startDate: "2026-06-01", endDate: null }]);
+    expect(t.durations[0].value).toBe(1);
+  });
+
+  it("sorts unordered input before building series", () => {
+    const t = computePeriodTrends([period("2026-06-01", 5), period("2026-05-04", 5)]);
+    expect(t.cycles.map((c) => c.value)).toEqual([28]);
   });
 });

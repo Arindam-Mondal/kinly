@@ -38,6 +38,12 @@ export function formatHuman(iso: string): string {
   });
 }
 
+// 'YYYY-MM-DD' -> short month, e.g. "Jun". Built from parts to avoid UTC parsing shifts.
+export function formatMonthShort(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short" });
+}
+
 // Fixed 6-row grid (42 days) including leading/trailing days from adjacent months,
 // so the layout never jumps between months.
 export function buildMonthGrid(year: number, monthIndex: number, weekStartsOn = 0): GridDay[][] {
