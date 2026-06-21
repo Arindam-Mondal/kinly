@@ -67,6 +67,13 @@ timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed t
 - **Step 11 — Onboarding:** first-run flow (`app/onboarding/page.tsx` currently a stub).
 - **Step 12 — PWA polish:** empty states, install prompt (after first logged period), offline write
   queue, Lighthouse pass. Re-enable `storage` in `config.toml` only when Phase 2 uploads begin.
+  *(Partial, done early:* app icon + web manifest. A single Fraunces-style "K" monogram —
+  `lib/brand/icon.tsx` (`IconArt`, citron-on-forest, `rounded`/`safeZone` knobs) — is rasterized at
+  build via `next/og`/`ImageResponse` into the favicon (`app/icon.tsx`), iOS apple-touch icon
+  (`app/apple-icon.tsx`, full-bleed square), and the 192/512 + maskable manifest icons
+  (`app/icons/*/route.tsx`). `app/manifest.ts` defines the install manifest; `app/layout.tsx` carries
+  `appleWebApp` metadata + `themeColor`; the default `favicon.ico` was removed. No `sharp` — all icons
+  are generated from one SVG source. Not yet exercised via a real "Add to Home Screen" on device.)*
 - **Step 13 — Extensibility sanity check:** confirm a hypothetical migraine domain would touch only
   new files, not `Calendar`/`NotesList`/`profiles`/core `log_entries` columns (tech spec §8).
 
@@ -81,12 +88,12 @@ local Supabase stack.
 **To run locally** (full steps in `HOW_TO_RUN.md`): `corepack pnpm exec supabase start`, then
 `corepack pnpm dev` → http://localhost:3000. `.env.local` already holds the local keys.
 
-**Git state:** steps 1–9 are committed and pushed to `origin/main` (step 9 = commit
-`Add Insights screen with cycle/period trends (step 9)`). Working tree is clean. Commit new work
-without a `Co-Authored-By` trailer (user preference) and keep messages short/descriptive. **DB note:**
-the user applies schema changes to a **live cloud Supabase** manually — whenever a step adds/alters
-tables, also hand them a standalone, idempotent prod SQL script (additive, RLS-preserving). Step 9
-was read-only, so no script was needed.
+**Git state:** steps 1–9 are committed and pushed to `origin/main`, plus the early step-12 app
+icon/manifest work (commit `Add app icon + PWA manifest (K monogram, generated via next/og)`, pushed).
+Working tree is clean. Commit new work without a `Co-Authored-By` trailer (user preference) and keep
+messages short/descriptive. **DB note:** the user applies schema changes to a **live cloud Supabase**
+manually — whenever a step adds/alters tables, also hand them a standalone, idempotent prod SQL script
+(additive, RLS-preserving). The icon/manifest work was app-only, so no script was needed.
 
 **Auth approach (decided):** email confirmation is OFF (auto-confirm — `config.toml`
 `auth.email.enable_confirmations = false`); the `profiles` row is created by the `handle_new_user`
