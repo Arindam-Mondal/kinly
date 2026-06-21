@@ -133,7 +133,7 @@ export function Calendar({
               aria-pressed={selPos != null}
               disabled={!interactive}
               onClick={() => handleTap(cell.iso, entry?.e.id)}
-              className="relative flex h-11 items-center justify-center rounded-xl disabled:cursor-default"
+              className="relative flex h-11 min-w-0 items-center justify-center rounded-xl disabled:cursor-default"
             >
               {entry?.pos && (
                 <span className={`absolute inset-y-1.5 ${capClass[entry.pos]} ${fill?.fillClass ?? ""}`} aria-hidden />
@@ -145,7 +145,7 @@ export function Calendar({
                 />
               )}
               <span
-                className={`relative z-10 flex h-9 w-9 items-center justify-center text-sm ${
+                className={`relative z-10 flex h-9 w-9 max-w-full items-center justify-center text-sm ${
                   !cell.inCurrentMonth
                     ? "text-ink/25"
                     : isFuture

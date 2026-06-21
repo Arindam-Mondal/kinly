@@ -143,7 +143,7 @@ export function CalendarView({
         {sheet && (
           <div className="space-y-4">
             <div className="flex gap-3">
-              <label className="flex-1 text-sm font-medium text-ink/80">
+              <label className="min-w-0 flex-1 text-sm font-medium text-ink/80">
                 Start
                 <input
                   type="date"
@@ -153,7 +153,7 @@ export function CalendarView({
                   className="mt-1 w-full rounded-2xl border border-ink/10 bg-canvas px-3 py-2.5 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/40"
                 />
               </label>
-              <label className="flex-1 text-sm font-medium text-ink/80">
+              <label className="min-w-0 flex-1 text-sm font-medium text-ink/80">
                 End
                 <input
                   type="date"
