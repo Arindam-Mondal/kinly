@@ -37,17 +37,17 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-ink">Reset your password</h1>
-      <p className="mt-1 text-sm text-ink/60">We&apos;ll email you a link to set a new one.</p>
+      <p className="mt-1 text-sm text-ink/70">We&apos;ll email you a link to set a new one.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
         <div>
           <label className={labelClass} htmlFor="email">Email</label>
           <input id="email" type="email" className={inputClass} autoComplete="email" {...register("email")} />
-          {errors.email && <p className="mt-1 text-sm text-[#a8412a]">{errors.email.message}</p>}
+          {errors.email && <p className="mt-1 text-sm text-danger">{errors.email.message}</p>}
         </div>
 
         {message && <p className="rounded-2xl bg-accent/15 p-3 text-sm text-ink">{message}</p>}
-        {error && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{error}</p>}
+        {error && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{error}</p>}
 
         <button
           type="submit"
@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-ink/60">
+      <p className="mt-6 text-center text-sm text-ink/70">
         <Link href="/login" className="font-semibold text-ink underline decoration-accent decoration-2 underline-offset-2">Back to log in</Link>
       </p>
     </div>

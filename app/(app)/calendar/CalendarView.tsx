@@ -129,13 +129,13 @@ export function CalendarView({
         />
       </div>
 
-      <div className="flex flex-wrap gap-4 px-1 text-xs text-ink/60">
+      <div className="flex flex-wrap gap-4 px-1 text-xs text-ink/70">
         <LegendDot className="bg-accent" label="Logged period" />
         <LegendDot className="border-2 border-dashed border-accent" label="Predicted" />
         <LegendDot className="ring-1 ring-ink/40" label="Today" />
       </div>
 
-      <p className="px-1 text-sm text-ink/50">
+      <p className="px-1 text-sm text-ink/70">
         Tap a start date, then an end date, to log a period. Tap a logged day to edit it.
       </p>
 
@@ -166,7 +166,7 @@ export function CalendarView({
               </label>
             </div>
 
-            <p className="text-sm text-ink/60">
+            <p className="text-sm text-ink/70">
               {formatHuman(sheet.start)} – {formatHuman(sheet.end)}
             </p>
 
@@ -182,7 +182,7 @@ export function CalendarView({
               />
             </label>
 
-            {error && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{error}</p>}
+            {error && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{error}</p>}
 
             <div className="flex gap-3">
               <button
@@ -204,7 +204,7 @@ export function CalendarView({
 
             {editing &&
               (confirmingDelete ? (
-                <div className="rounded-2xl bg-[#a8412a]/10 p-3">
+                <div className="rounded-2xl bg-danger/10 p-3">
                   <p className="text-sm text-ink/80">Delete this logged period? This can&apos;t be undone.</p>
                   <div className="mt-3 flex gap-3">
                     <button
@@ -218,7 +218,7 @@ export function CalendarView({
                       type="button"
                       onClick={remove}
                       disabled={pending}
-                      className="flex-1 rounded-2xl bg-[#a8412a] px-4 py-2.5 font-semibold text-canvas active:scale-95 disabled:opacity-60"
+                      className="flex-1 rounded-2xl bg-danger px-4 py-2.5 font-semibold text-canvas active:scale-95 disabled:opacity-60"
                     >
                       {pending ? "Deleting…" : "Delete"}
                     </button>
@@ -228,7 +228,7 @@ export function CalendarView({
                 <button
                   type="button"
                   onClick={() => setConfirmingDelete(true)}
-                  className="w-full rounded-2xl px-4 py-2.5 text-sm font-medium text-[#a8412a] transition-all duration-200 active:scale-95"
+                  className="w-full rounded-2xl px-4 py-2.5 text-sm font-medium text-danger transition-all duration-200 active:scale-95"
                 >
                   Delete period
                 </button>

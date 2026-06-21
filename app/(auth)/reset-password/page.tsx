@@ -42,11 +42,11 @@ export default function ResetPasswordPage() {
         <div>
           <label className={labelClass} htmlFor="password">New password</label>
           <input id="password" type="password" className={inputClass} autoComplete="new-password" {...register("password")} />
-          <p className="mt-1 text-xs text-ink/50">{strength.label} · at least 8 characters and a number</p>
-          {errors.password && <p className="mt-1 text-sm text-[#a8412a]">{errors.password.message}</p>}
+          <p className="mt-1 text-xs text-ink/70">{strength.label} · at least 8 characters and a number</p>
+          {errors.password && <p className="mt-1 text-sm text-danger">{errors.password.message}</p>}
         </div>
 
-        {formError && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{formError}</p>}
+        {formError && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{formError}</p>}
 
         <button
           type="submit"

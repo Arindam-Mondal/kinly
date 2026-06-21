@@ -31,10 +31,10 @@ describe("Calendar", () => {
     const onRangeComplete = vi.fn();
     render(<Harness onRangeComplete={onRangeComplete} />);
 
-    await user.click(screen.getByLabelText("2026-06-10"));
+    await user.click(screen.getByLabelText("Jun 10, 2026"));
     expect(onRangeComplete).not.toHaveBeenCalled(); // start only
 
-    await user.click(screen.getByLabelText("2026-06-12"));
+    await user.click(screen.getByLabelText("Jun 12, 2026"));
     expect(onRangeComplete).toHaveBeenCalledWith("2026-06-10", "2026-06-12");
   });
 
@@ -44,8 +44,8 @@ describe("Calendar", () => {
     render(<Harness onRangeComplete={onRangeComplete} />);
 
     // today is 2026-06-20, so the 25th is in the future and disabled
-    expect(screen.getByLabelText("2026-06-25")).toBeDisabled();
-    await user.click(screen.getByLabelText("2026-06-25"));
+    expect(screen.getByLabelText("Jun 25, 2026")).toBeDisabled();
+    await user.click(screen.getByLabelText("Jun 25, 2026"));
     expect(onRangeComplete).not.toHaveBeenCalled();
   });
 
@@ -70,7 +70,7 @@ describe("Calendar", () => {
       />,
     );
 
-    await user.click(screen.getByLabelText("2026-06-11"));
+    await user.click(screen.getByLabelText("Jun 11, 2026, Logged period"));
     expect(onEntryTap).toHaveBeenCalledWith("abc");
     expect(onRangeComplete).not.toHaveBeenCalled();
   });

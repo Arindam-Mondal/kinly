@@ -8,6 +8,7 @@ import {
   type Selection,
   addMonths,
   buildMonthGrid,
+  formatHuman,
   monthLabel,
   nextSelection,
   rangePosition,
@@ -98,7 +99,7 @@ export function Calendar({
 
       <div className="grid grid-cols-7 pb-1">
         {labels.map((label) => (
-          <div key={label} className="text-center text-xs font-medium text-ink/40">
+          <div key={label} className="text-center text-xs font-medium text-ink/70">
             {label}
           </div>
         ))}
@@ -114,16 +115,25 @@ export function Calendar({
           const isFuture = cell.iso > max;
           const interactive = cell.inCurrentMonth && !isFuture;
           const fill = entry?.pos ? config.styles[entry.e.styleKey] : null;
+          // Announce a human date plus any state, so assistive tech reads
+          // "Jun 11, 2026, today, Logged period" rather than the raw ISO string.
+          const ariaLabel = [
+            formatHuman(cell.iso),
+            isToday ? "today" : null,
+            entry ? config.styles[entry.e.styleKey].label : null,
+          ]
+            .filter(Boolean)
+            .join(", ");
 
           return (
             <button
               key={cell.iso}
               type="button"
-              aria-label={cell.iso}
+              aria-label={ariaLabel}
               aria-pressed={selPos != null}
               disabled={!interactive}
               onClick={() => handleTap(cell.iso, entry?.e.id)}
-              className="relative flex h-11 items-center justify-center disabled:cursor-default"
+              className="relative flex h-11 items-center justify-center rounded-xl disabled:cursor-default"
             >
               {entry?.pos && (
                 <span className={`absolute inset-y-1.5 ${capClass[entry.pos]} ${fill?.fillClass ?? ""}`} aria-hidden />

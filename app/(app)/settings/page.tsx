@@ -24,7 +24,7 @@ export default async function SettingsPage() {
             <UserRound size={18} />
           </span>
           <div>
-            <p className="text-xs text-ink/50">Name</p>
+            <p className="text-xs text-ink/70">Name</p>
             <p className="text-base font-medium text-ink">{profile?.name ?? "—"}</p>
           </div>
         </div>
@@ -33,7 +33,7 @@ export default async function SettingsPage() {
             <Mail size={18} />
           </span>
           <div>
-            <p className="text-xs text-ink/50">Email</p>
+            <p className="text-xs text-ink/70">Email</p>
             <p className="text-base font-medium text-ink">{profile?.email ?? user.email}</p>
           </div>
         </div>

@@ -10,7 +10,7 @@ import { signInAction } from "../actions";
 const inputClass =
   "w-full rounded-2xl border border-ink/10 bg-canvas px-4 py-3 text-base text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40";
 const labelClass = "block text-sm font-medium text-ink/80";
-const errorClass = "mt-1 text-sm text-[#a8412a]";
+const errorClass = "mt-1 text-sm text-danger";
 
 export default function LoginPage() {
   const [formError, setFormError] = useState("");
@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-ink">Welcome back</h1>
-      <p className="mt-1 text-sm text-ink/60">Log in to Kinly.</p>
+      <p className="mt-1 text-sm text-ink/70">Log in to Kinly.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
         <div>
@@ -53,7 +53,7 @@ export default function LoginPage() {
           {errors.password && <p className={errorClass}>{errors.password.message}</p>}
         </div>
 
-        {formError && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{formError}</p>}
+        {formError && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{formError}</p>}
 
         <button
           type="submit"
@@ -64,7 +64,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-ink/60">
+      <p className="mt-6 text-center text-sm text-ink/70">
         New to Kinly?{" "}
         <Link href="/register" className="font-semibold text-ink underline decoration-accent decoration-2 underline-offset-2">Create an account</Link>
       </p>

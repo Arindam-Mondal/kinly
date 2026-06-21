@@ -22,8 +22,8 @@ const SEX_LABELS: Record<(typeof SEX_VALUES)[number], string> = {
 const inputClass =
   "w-full rounded-2xl border border-ink/10 bg-canvas px-4 py-3 text-base text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40";
 const labelClass = "block text-sm font-medium text-ink/80";
-const errorClass = "mt-1 text-sm text-[#a8412a]";
-const strengthColors = ["bg-ink/15", "bg-[#a8412a]", "bg-amber-500", "bg-accent", "bg-accent-strong"];
+const errorClass = "mt-1 text-sm text-danger";
+const strengthColors = ["bg-ink/15", "bg-danger", "bg-amber-500", "bg-accent", "bg-accent-strong"];
 
 export default function RegisterPage() {
   const [formError, setFormError] = useState("");
@@ -51,7 +51,7 @@ export default function RegisterPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-ink">Create your account</h1>
-      <p className="mt-1 text-sm text-ink/60">Track your cycle — for yourself or someone you support.</p>
+      <p className="mt-1 text-sm text-ink/70">Track your cycle — for yourself or someone you support.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
         <div>
@@ -77,7 +77,7 @@ export default function RegisterPage() {
               />
             ))}
           </div>
-          <p className="mt-1 text-xs text-ink/50">{strength.label} · at least 8 characters and a number</p>
+          <p className="mt-1 text-xs text-ink/70">{strength.label} · at least 8 characters and a number</p>
           {errors.password && <p className={errorClass}>{errors.password.message}</p>}
         </div>
 
@@ -98,7 +98,7 @@ export default function RegisterPage() {
         </div>
         {(errors.age || errors.sex) && <p className={errorClass}>{errors.age?.message ?? errors.sex?.message}</p>}
 
-        {formError && <p className="rounded-2xl bg-[#a8412a]/10 p-3 text-sm text-[#a8412a]">{formError}</p>}
+        {formError && <p className="rounded-2xl bg-danger/10 p-3 text-sm text-danger">{formError}</p>}
 
         <button
           type="submit"
@@ -109,7 +109,7 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-ink/60">
+      <p className="mt-6 text-center text-sm text-ink/70">
         Already have an account?{" "}
         <Link href="/login" className="font-semibold text-ink underline decoration-accent decoration-2 underline-offset-2">Log in</Link>
       </p>

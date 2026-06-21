@@ -29,12 +29,12 @@ export function BottomNav() {
             >
               <span
                 className={`flex h-9 w-14 items-center justify-center rounded-2xl transition-colors duration-200 ${
-                  active ? "bg-accent text-ink" : "text-ink/45"
+                  active ? "bg-accent text-ink" : "text-ink/70"
                 }`}
               >
                 <Icon size={20} strokeWidth={active ? 2.4 : 2} />
               </span>
-              <span className={`text-[11px] font-medium ${active ? "text-ink" : "text-ink/45"}`}>
+              <span className={`text-[11px] font-medium ${active ? "text-ink" : "text-ink/70"}`}>
                 {label}
               </span>
             </Link>

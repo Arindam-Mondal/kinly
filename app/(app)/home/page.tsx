@@ -55,14 +55,14 @@ function FirstTimeDashboard({ greeting, firstName }: { greeting: string; firstNa
   return (
     <>
       <section className="rounded-3xl bg-surface p-6 shadow-soft">
-        <p className="text-sm text-ink/60">Good {greeting},</p>
+        <p className="text-sm text-ink/70">Good {greeting},</p>
         <h1 className="font-display text-3xl font-semibold leading-tight text-ink">{firstName}</h1>
 
         <div className="mt-5 flex items-center gap-5">
           <CycleRing day={null} progress={0.06} />
           <div className="flex-1">
             <p className="text-base font-medium text-ink">Let&apos;s start tracking</p>
-            <p className="mt-1 text-sm leading-relaxed text-ink/60">
+            <p className="mt-1 text-sm leading-relaxed text-ink/70">
               Log your first period and Kinly will begin learning your cycle.
             </p>
           </div>
@@ -104,14 +104,14 @@ function TrackingDashboard({
   return (
     <>
       <section className="rounded-3xl bg-surface p-6 shadow-soft">
-        <p className="text-sm text-ink/60">Good {greeting},</p>
+        <p className="text-sm text-ink/70">Good {greeting},</p>
         <h1 className="font-display text-3xl font-semibold leading-tight text-ink">{firstName}</h1>
 
         <div className="mt-5 flex items-center gap-5">
           <CycleRing day={insights.currentCycleDay} progress={progress} />
           <div className="flex-1">
             <p className="text-base font-medium text-ink">{copy.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-ink/60">{copy.body}</p>
+            <p className="mt-1 text-sm leading-relaxed text-ink/70">{copy.body}</p>
           </div>
         </div>
       </section>
@@ -150,7 +150,7 @@ type Metric = { Icon: typeof Repeat; label: string; value: string; unit: string 
 function MetricGrid({ metrics }: { metrics: Metric[] }) {
   return (
     <section>
-      <h2 className="px-1 pb-3 text-sm font-medium text-ink/60">Your pillars</h2>
+      <h2 className="px-1 pb-3 text-sm font-medium text-ink/70">Cycle overview</h2>
       <div className="grid grid-cols-2 gap-3">
         {metrics.map(({ Icon, label, value, unit }) => (
           <div key={label} className="rounded-3xl bg-surface p-4 shadow-soft">
@@ -159,9 +159,9 @@ function MetricGrid({ metrics }: { metrics: Metric[] }) {
             </span>
             <p className="mt-3 text-2xl font-semibold text-ink">
               {value}
-              {unit && <span className="ml-1 text-sm font-normal text-ink/50">{unit}</span>}
+              {unit && <span className="ml-1 text-sm font-normal text-ink/70">{unit}</span>}
             </p>
-            <p className="text-sm text-ink/60">{label}</p>
+            <p className="text-sm text-ink/70">{label}</p>
           </div>
         ))}
       </div>
@@ -177,7 +177,7 @@ function PrimaryCta({ title, body }: { title: string; body: string }) {
     >
       <span>
         <span className="block font-display text-lg font-semibold">{title}</span>
-        <span className="block text-sm text-ink/70">{body}</span>
+        <span className="block text-sm text-ink/80">{body}</span>
       </span>
       <span className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-accent">
         <Droplet size={20} />
@@ -210,7 +210,7 @@ function CycleRing({ day, progress }: { day: number | null; progress: number }) 
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xs text-ink/50">Cycle</span>
+        <span className="text-xs text-ink/70">Cycle</span>
         <span className="font-display text-2xl font-semibold text-ink">{day == null ? "Day —" : `Day ${day}`}</span>
       </div>
     </div>

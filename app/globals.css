@@ -9,6 +9,7 @@
   --color-ink: #1e3a1e; /* deep forest green — text, icons, lines */
   --color-accent: #a3e635; /* citron/sage — actions & vital metrics only */
   --color-accent-strong: #8fd123; /* accent, pressed/hover */
+  --color-danger: #a8412a; /* warm brick — errors & destructive actions (AA on canvas) */
 
   --shadow-soft: 0 4px 20px -4px rgba(30, 58, 30, 0.06);
   --shadow-lift: 0 10px 30px -10px rgba(30, 58, 30, 0.12);
@@ -22,6 +23,19 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Consistent, on-brand keyboard focus across links and buttons (the app is also a
+   desktop PWA). Ink outline reads on both the canvas and the citron accent; the
+   offset lifts it clear of the element's own rounded shape. Inputs keep their own
+   accent ring. Pointer interactions stay clean via :focus-visible. */
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
 }
 
 /* Respect users who prefer less motion. */

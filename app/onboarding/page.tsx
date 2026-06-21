@@ -15,7 +15,7 @@ export default async function OnboardingPage() {
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center bg-canvas p-6 text-center">
       <p className="font-display text-3xl font-semibold tracking-tight text-ink">Kinly</p>
       <h1 className="mt-8 font-display text-2xl font-semibold text-ink">Welcome</h1>
-      <p className="mt-2 text-sm leading-relaxed text-ink/60">
+      <p className="mt-2 text-sm leading-relaxed text-ink/70">
         Log dates for your own cycle, or for someone you support — it works the same either way.
       </p>
       <Link
