@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Build-sequence steps 1–8 are done. The app boots/builds/lints/typechecks and the full test suite
-(85 tests) is green. (Note: on this machine `pnpm test` can flake with parallel worker-startup
+Build-sequence steps 1–9 are done. The app boots/builds/lints/typechecks and the full test suite
+(103 tests) is green. (Note: on this machine `pnpm test` can flake with parallel worker-startup
 timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed to start forks worker".)
 
 - **Step 1 — scaffold:** Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4, pnpm via Corepack.
@@ -46,11 +46,22 @@ timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed t
   Calendar note affordance (tech spec §5.5 long-press/info-icon) was deliberately deferred to keep the
   range-picker stable — small follow-up, not done here.
 
-**▶ Resume here — next is build-sequence step 9.** Pending work (tech spec §11):
+- **Step 9 — Insights:** `app/(app)/insights/{page,loading}.tsx` — a read-only Server Component
+  rendering trend charts + stat cards + a plain-language irregularity summary. **Decision (asked):**
+  charts are **hand-rolled inline SVG** (`components/insights/TrendChart.tsx`, domain-agnostic
+  line/bar with average overlay), **not Recharts** — zero charting dependency, fully server-rendered
+  (route is `ƒ`, no client JS for charts) for performance. The number logic does **not** fork the
+  engine: `lib/domains/period/periodInsights.ts` gained shared `cycleLengthsOf`/`durationsOf` helpers
+  + a new pure `computePeriodTrends()` (last-12 series, shortest/longest, totals; average lines reuse
+  the same rolling-6 averages as the dashboard). The irregularity summary
+  (`lib/domains/period/getInsightsSummary.ts`) switches on the **same** `prediction.status` flag, takes
+  **no `sex` arg** (domain-descriptive copy only — not a second `getDashboardCopy` branch), and keeps
+  the non-alarmist tone (significant-delay ends with the soft provider suggestion). Stat cards: avg
+  cycle, avg period, shortest cycle, longest cycle (total shown in the header). **Decision (asked):**
+  the §5.6 month heatmap/history strip was **deferred to step 12 polish**.
 
-- **Step 9 — Insights:** Recharts screen (tech spec §5.6) — stat cards (avg cycle, avg period,
-  shortest/longest, total) + a plain-language irregularity summary generated from the **same**
-  `periodInsights` logic as the dashboard flag (don't fork the logic).
+**▶ Resume here — next is build-sequence step 10.** Pending work (tech spec §11):
+
 - **Step 10 — Settings:** edit name/age/sex, dark-mode toggle, "Export my data" (`/api/export`, JSON),
   "Delete account" (confirm modal; cascades via DB `ON DELETE CASCADE`).
 - **Step 11 — Onboarding:** first-run flow (`app/onboarding/page.tsx` currently a stub).
@@ -62,17 +73,20 @@ timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed t
 Known follow-ups (not blocking): no e2e/Playwright coverage yet for the period/note create/edit/delete
 flows (the suite is unit + RTL only — `e2e/` is empty); the note Server Actions rely on the same
 `log_entries` RLS as periods but have no live-Supabase cross-user test yet; the per-day Calendar note
-affordance (tech spec §5.5) is deferred (see step 8); the new Home/Calendar/Notes work has been built
-and verified via `typecheck`/`lint`/`test`/`build` but **not yet exercised in a browser** against the
+affordance (tech spec §5.5) is deferred (see step 8); the Insights month heatmap/history strip
+(tech spec §5.6) is deferred to step 12; the Home/Calendar/Notes/Insights work has been built and
+verified via `typecheck`/`lint`/`test`/`build` but **not yet exercised in a browser** against the
 local Supabase stack.
 
 **To run locally** (full steps in `HOW_TO_RUN.md`): `corepack pnpm exec supabase start`, then
 `corepack pnpm dev` → http://localhost:3000. `.env.local` already holds the local keys.
 
-**Git state:** steps 1–7 are committed on `main`; **step 8 (Notes/Journal) is built and verified but
-not yet committed** (working tree has the new `notes/` files + the Calendar `?edit=` deep link).
-Commit new work without a `Co-Authored-By` trailer
-(user preference) and keep messages short/descriptive.
+**Git state:** steps 1–9 are committed and pushed to `origin/main` (step 9 = commit
+`Add Insights screen with cycle/period trends (step 9)`). Working tree is clean. Commit new work
+without a `Co-Authored-By` trailer (user preference) and keep messages short/descriptive. **DB note:**
+the user applies schema changes to a **live cloud Supabase** manually — whenever a step adds/alters
+tables, also hand them a standalone, idempotent prod SQL script (additive, RLS-preserving). Step 9
+was read-only, so no script was needed.
 
 **Auth approach (decided):** email confirmation is OFF (auto-confirm — `config.toml`
 `auth.email.enable_confirmations = false`); the `profiles` row is created by the `handle_new_user`
