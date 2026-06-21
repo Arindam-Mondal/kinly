@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist } from "next/font/google";
 import "./globals.css";
 
@@ -18,6 +18,12 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Kinly",
   description: "A calm, private health & cycle tracker.",
+  // Lets iOS treat the app as standalone with our title when added to the Home Screen.
+  appleWebApp: { capable: true, title: "Kinly", statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1e3a1e", // deep forest — matches the manifest theme_color
 };
 
 export default function RootLayout({
