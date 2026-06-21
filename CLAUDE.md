@@ -33,17 +33,33 @@ timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed t
   first-person) — do not branch on sex anywhere else. **Note:** the "Cycles logged" stat shows the
   count of logged *periods* (most intuitive after logging one), not period-to-period intervals.
 
-**▶ Resume here — next is build-sequence steps 8–9:**
-- **Step 8:** `components/notes/NotesList.tsx` (domain-agnostic, `domain` filter prop) + the Notes/
-  Journal screen + the day-detail bottom sheet shared from the Calendar (tech spec §5.7).
-- **Step 9:** the Insights screen with Recharts (tech spec §5.6) — stat cards + an irregularity
-  summary generated from the same `periodInsights` logic as the dashboard flag.
+**▶ Resume here — next is build-sequence step 8.** Pending work (tech spec §11):
+
+- **Step 8 — Notes/Journal:** `components/notes/NotesList.tsx` (domain-agnostic, `domain` filter prop)
+  + the Notes screen + the day-detail bottom sheet shared from the Calendar (tech spec §5.7). This is
+  also where *standalone* notes (`domain = 'note'`, `end_date = null`) get created.
+- **Step 9 — Insights:** Recharts screen (tech spec §5.6) — stat cards (avg cycle, avg period,
+  shortest/longest, total) + a plain-language irregularity summary generated from the **same**
+  `periodInsights` logic as the dashboard flag (don't fork the logic).
+- **Step 10 — Settings:** edit name/age/sex, dark-mode toggle, "Export my data" (`/api/export`, JSON),
+  "Delete account" (confirm modal; cascades via DB `ON DELETE CASCADE`).
+- **Step 11 — Onboarding:** first-run flow (`app/onboarding/page.tsx` currently a stub).
+- **Step 12 — PWA polish:** empty states, install prompt (after first logged period), offline write
+  queue, Lighthouse pass. Re-enable `storage` in `config.toml` only when Phase 2 uploads begin.
+- **Step 13 — Extensibility sanity check:** confirm a hypothetical migraine domain would touch only
+  new files, not `Calendar`/`NotesList`/`profiles`/core `log_entries` columns (tech spec §8).
+
+Known follow-ups (not blocking): no e2e/Playwright coverage yet for the period create/edit/delete
+flow (the suite is unit + RTL only — `e2e/` is empty); the new Home/Calendar work has been built and
+verified via `typecheck`/`lint`/`test`/`build` but **not yet exercised in a browser** against the
+local Supabase stack.
 
 **To run locally** (full steps in `HOW_TO_RUN.md`): `corepack pnpm exec supabase start`, then
 `corepack pnpm dev` → http://localhost:3000. `.env.local` already holds the local keys.
 
-**Uncommitted work:** step 4 may be uncommitted on `main` — run `git status` first; commit it (no
-`Co-Authored-By` trailer — user preference) before starting new work.
+**Git state:** steps 1–7 are committed on `main` (latest: "Add prediction engine, period edit/delete,
+and live Home dashboard"). Working tree is clean. Commit new work without a `Co-Authored-By` trailer
+(user preference) and keep messages short/descriptive.
 
 **Auth approach (decided):** email confirmation is OFF (auto-confirm — `config.toml`
 `auth.email.enable_confirmations = false`); the `profiles` row is created by the `handle_new_user`
@@ -68,6 +84,13 @@ Visual references: `Kinly_Architecture_Diagram.html` (request-flow diagrams) and
 (entity relationships) are present in the repo root.
 
 When the tech spec and PRD disagree, the **tech spec wins** for build decisions; the PRD wins for product/copy intent.
+
+## Design Context (for the `impeccable` design skill)
+
+`PRODUCT.md` (strategic: register, users, principles, anti-references) and `DESIGN.md` (the "Organic
+Olive" visual system, with the real `@theme` tokens from `app/globals.css`) live in the repo root.
+The `impeccable` skill reads them before any design work. They're derived from the PRD and
+`.claude/skills/kinly-dev/references/ui.md` — keep all three in sync if the design direction changes.
 
 > **Next.js 16 / React 19 caveat:** this scaffold uses Next.js 16.2.9 and React 19.2.4 — newer than
 > many training cutoffs, with breaking changes from earlier Next. Before writing Next-specific code,
