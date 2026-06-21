@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Build-sequence steps 1–7 are done. The app boots/builds/lints/typechecks and the full test suite
-(71 tests) is green. (Note: on this machine `pnpm test` can flake with parallel worker-startup
+Build-sequence steps 1–8 are done. The app boots/builds/lints/typechecks and the full test suite
+(85 tests) is green. (Note: on this machine `pnpm test` can flake with parallel worker-startup
 timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed to start forks worker".)
 
 - **Step 1 — scaffold:** Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4, pnpm via Corepack.
@@ -33,11 +33,21 @@ timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed t
   first-person) — do not branch on sex anywhere else. **Note:** the "Cycles logged" stat shows the
   count of logged *periods* (most intuitive after logging one), not period-to-period intervals.
 
-**▶ Resume here — next is build-sequence step 8.** Pending work (tech spec §11):
+- **Step 8 — Notes/Journal:** domain-agnostic `components/notes/NotesList.tsx` (`domain` filter prop,
+  badge slot shown only when >1 domain present, sorts newest-first) renders the journal — every
+  `log_entries` row carrying note text, across domains (a period's `notes` column *and* standalone
+  `domain = 'note'` rows). The Notes screen (`app/(app)/notes/{page,NotesView}.tsx`) adds/edits/deletes
+  *standalone* notes (`domain = 'note'`, `end_date = null`) via a bottom sheet; Server Actions in
+  `app/(app)/notes/actions.ts` re-check auth and scope writes by `id + user_id + domain = 'note'`
+  (defence in depth). Validation: `lib/validation/note.ts` (text required, ≤1000, no future date).
+  **Decision (asked):** a tapped journal item that is a *period's* note deep-links to the calendar's
+  existing period editor (`/calendar?edit=<id>`, opened via lazy initial state in `CalendarView`) —
+  period notes are edited where they live; only standalone notes open the note sheet. The per-day
+  Calendar note affordance (tech spec §5.5 long-press/info-icon) was deliberately deferred to keep the
+  range-picker stable — small follow-up, not done here.
 
-- **Step 8 — Notes/Journal:** `components/notes/NotesList.tsx` (domain-agnostic, `domain` filter prop)
-  + the Notes screen + the day-detail bottom sheet shared from the Calendar (tech spec §5.7). This is
-  also where *standalone* notes (`domain = 'note'`, `end_date = null`) get created.
+**▶ Resume here — next is build-sequence step 9.** Pending work (tech spec §11):
+
 - **Step 9 — Insights:** Recharts screen (tech spec §5.6) — stat cards (avg cycle, avg period,
   shortest/longest, total) + a plain-language irregularity summary generated from the **same**
   `periodInsights` logic as the dashboard flag (don't fork the logic).
@@ -49,16 +59,19 @@ timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed t
 - **Step 13 — Extensibility sanity check:** confirm a hypothetical migraine domain would touch only
   new files, not `Calendar`/`NotesList`/`profiles`/core `log_entries` columns (tech spec §8).
 
-Known follow-ups (not blocking): no e2e/Playwright coverage yet for the period create/edit/delete
-flow (the suite is unit + RTL only — `e2e/` is empty); the new Home/Calendar work has been built and
-verified via `typecheck`/`lint`/`test`/`build` but **not yet exercised in a browser** against the
+Known follow-ups (not blocking): no e2e/Playwright coverage yet for the period/note create/edit/delete
+flows (the suite is unit + RTL only — `e2e/` is empty); the note Server Actions rely on the same
+`log_entries` RLS as periods but have no live-Supabase cross-user test yet; the per-day Calendar note
+affordance (tech spec §5.5) is deferred (see step 8); the new Home/Calendar/Notes work has been built
+and verified via `typecheck`/`lint`/`test`/`build` but **not yet exercised in a browser** against the
 local Supabase stack.
 
 **To run locally** (full steps in `HOW_TO_RUN.md`): `corepack pnpm exec supabase start`, then
 `corepack pnpm dev` → http://localhost:3000. `.env.local` already holds the local keys.
 
-**Git state:** steps 1–7 are committed on `main` (latest: "Add prediction engine, period edit/delete,
-and live Home dashboard"). Working tree is clean. Commit new work without a `Co-Authored-By` trailer
+**Git state:** steps 1–7 are committed on `main`; **step 8 (Notes/Journal) is built and verified but
+not yet committed** (working tree has the new `notes/` files + the Calendar `?edit=` deep link).
+Commit new work without a `Co-Authored-By` trailer
 (user preference) and keep messages short/descriptive.
 
 **Auth approach (decided):** email confirmation is OFF (auto-confirm — `config.toml`

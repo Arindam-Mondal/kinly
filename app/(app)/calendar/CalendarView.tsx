@@ -28,13 +28,22 @@ const PREDICTED_ID = "predicted-next";
 export function CalendarView({
   periods,
   predicted,
+  initialEditId = null,
 }: {
   periods: LoggedPeriod[];
   predicted: { start: string; end: string } | null;
+  initialEditId?: string | null;
 }) {
   const router = useRouter();
   const [selection, setSelection] = useState<Selection | null>(null);
-  const [sheet, setSheet] = useState<SheetState | null>(null);
+  // Open the editor straight away when arriving via ?edit=<id> (e.g. from the journal).
+  // Lazy init runs once, so re-renders/refreshes won't reopen a sheet the user closed.
+  const [sheet, setSheet] = useState<SheetState | null>(() => {
+    const period = initialEditId ? periods.find((p) => p.id === initialEditId) : undefined;
+    return period
+      ? { id: period.id, start: period.startDate, end: period.endDate ?? period.startDate, notes: period.notes ?? "" }
+      : null;
+  });
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();

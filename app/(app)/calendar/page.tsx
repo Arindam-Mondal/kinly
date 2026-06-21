@@ -5,8 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { CalendarView, type LoggedPeriod } from "./CalendarView";
 
 // Fetches the user's logged periods (RLS scopes to their own rows), derives the next
-// predicted range, and hands both to the interactive client view.
-export default async function CalendarPage() {
+// predicted range, and hands both to the interactive client view. A `?edit=<id>` param
+// (e.g. from tapping a period's note in the journal) opens that period's editor on load.
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -32,5 +37,7 @@ export default async function CalendarPage() {
       ? { start: insights.predictedNextStart, end: insights.predictedRangeEnd }
       : null;
 
-  return <CalendarView periods={periods} predicted={predicted} />;
+  const { edit } = await searchParams;
+
+  return <CalendarView periods={periods} predicted={predicted} initialEditId={edit ?? null} />;
 }
