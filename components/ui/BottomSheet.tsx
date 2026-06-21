@@ -24,9 +24,12 @@ export function BottomSheet({
   const panelRef = useRef<HTMLDivElement>(null);
   // Hold the latest onClose without making it an effect dependency — otherwise the
   // focus effect re-runs on every parent render (e.g. each keystroke in a field)
-  // and steals focus back into the panel.
+  // and steals focus back into the panel. Sync in an effect (never during render) so
+  // the keydown handler still reads the current onClose.
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   // Move focus into the sheet on open, restore it to the trigger on close. Keyed on
   // `open` only, so it fires once per open — not on every re-render. Focus lands on

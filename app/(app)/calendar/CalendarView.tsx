@@ -150,7 +150,7 @@ export function CalendarView({
                   value={sheet.start}
                   max={sheet.end}
                   onChange={(e) => setSheet({ ...sheet, start: e.target.value })}
-                  className="mt-1 w-full rounded-2xl border border-ink/10 bg-canvas px-3 py-2.5 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/40"
+                  className="mt-1 w-full min-w-0 appearance-none rounded-2xl border border-ink/10 bg-canvas px-3 py-2.5 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/40"
                 />
               </label>
               <label className="min-w-0 flex-1 text-sm font-medium text-ink/80">
@@ -161,7 +161,7 @@ export function CalendarView({
                   min={sheet.start}
                   max={todayISO()}
                   onChange={(e) => setSheet({ ...sheet, end: e.target.value })}
-                  className="mt-1 w-full rounded-2xl border border-ink/10 bg-canvas px-3 py-2.5 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/40"
+                  className="mt-1 w-full min-w-0 appearance-none rounded-2xl border border-ink/10 bg-canvas px-3 py-2.5 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/40"
                 />
               </label>
             </div>
