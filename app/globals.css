@@ -38,6 +38,31 @@ body {
   }
 }
 
+/* Skeleton loading shimmer — a calm citron-tinted sweep over a muted block.
+   Gives instant "something is loading" feedback during route transitions
+   (DESIGN.md: skeleton loaders, not spinners). */
+.kinly-skeleton {
+  background-color: color-mix(in oklch, var(--color-ink) 6%, transparent);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--color-canvas) 60%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: kinly-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes kinly-shimmer {
+  from {
+    background-position: -150% 0;
+  }
+  to {
+    background-position: 150% 0;
+  }
+}
+
 /* Respect users who prefer less motion. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -45,5 +70,11 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* A frozen shimmer flickers — fall back to a calm static muted block. */
+  .kinly-skeleton {
+    animation: none;
+    background-image: none;
   }
 }

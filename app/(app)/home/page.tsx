@@ -16,15 +16,19 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase.from("profiles").select("name, sex").single();
+  // These two reads don't depend on each other — run them concurrently so the
+  // dashboard waits on one round-trip, not two stacked back-to-back.
+  const [{ data: profile }, { data }] = await Promise.all([
+    supabase.from("profiles").select("name, sex").single(),
+    supabase
+      .from("log_entries")
+      .select("start_date, end_date")
+      .eq("domain", "period")
+      .order("start_date", { ascending: true }),
+  ]);
+
   const firstName = profile?.name?.split(" ")[0] ?? "there";
   const sex = (profile?.sex ?? "prefer_not_to_say") as Sex;
-
-  const { data } = await supabase
-    .from("log_entries")
-    .select("start_date, end_date")
-    .eq("domain", "period")
-    .order("start_date", { ascending: true });
 
   const insights = computePeriodInsights(
     (data ?? []).map((row) => ({ startDate: row.start_date, endDate: row.end_date })),
