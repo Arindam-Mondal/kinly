@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current State
 
-Build-sequence steps 1–4 are done. The app boots/builds/lints/typechecks and the full test suite
-(48 tests) is green.
+Build-sequence steps 1–7 are done. The app boots/builds/lints/typechecks and the full test suite
+(71 tests) is green. (Note: on this machine `pnpm test` can flake with parallel worker-startup
+timeouts — run `corepack pnpm test --no-file-parallelism` if you see "Failed to start forks worker".)
 
 - **Step 1 — scaffold:** Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4, pnpm via Corepack.
 - **Step 2 — schema:** `profiles` + generic `log_entries` with owner-scoped RLS, on a local Supabase stack.
@@ -15,13 +16,28 @@ Build-sequence steps 1–4 are done. The app boots/builds/lints/typechecks and t
   confirm that **inserts** a period via the `createPeriodEntry` Server Action. Also: the
   "Organic Olive" design system (see `references/ui.md`) and the app shell (`components/app/AppHeader`,
   `BottomNav`) with placeholder Home/Insights/Notes/Settings screens.
+- **Step 5 — edit/delete periods:** tapping a logged day opens the same bottom sheet pre-filled, now
+  with Save-changes and a two-tap Delete. Server Actions `updatePeriodEntry` / `deletePeriodEntry`
+  (`app/(app)/calendar/actions.ts`) re-check auth and scope writes by `id + user_id + domain` (defence
+  in depth on top of RLS). `Calendar` stays domain-agnostic via a generic `onEntryTap(entryId)` prop —
+  the page decides which entries are editable (predicted entries aren't).
+- **Step 6 — prediction engine:** `lib/domains/period/periodInsights.ts` — pure, no I/O,
+  `computePeriodInsights(periods, todayISO)` → avg cycle length, avg period duration, predicted next
+  start/range, and a status flag (`on_track | running_late | significant_delay | possible_skip |
+  insufficient_data`) per tech spec §6 (rolling window 6; thresholds 5/14 days). Predicted ranges now
+  render on the Calendar via the existing `predicted` style. **Decision:** predictions are computed
+  **live** on each read (no `cycle_predictions` cache table — open decision #4).
+- **Step 7 — Home dashboard:** `app/(app)/home/page.tsx` reads logged periods, runs the engine, and
+  renders real metrics + a data-driven cycle ring. The single sex-based copy branch lives in
+  `components/dashboard/getDashboardCopy.ts` (male → neutral third-person framing; everyone else →
+  first-person) — do not branch on sex anywhere else. **Note:** the "Cycles logged" stat shows the
+  count of logged *periods* (most intuitive after logging one), not period-to-period intervals.
 
-**▶ Resume here — next is build-sequence steps 5–6:**
-- **Step 5:** edit & delete existing logged periods (tap a logged day → day-detail/edit sheet). Right
-  now periods can only be *created*, not edited/removed.
-- **Step 6:** the prediction engine — `lib/domains/period/periodInsights.ts` (pure, tested: avg cycle
-  length, predicted next start, delay/skip flags per tech spec §6) — then render predicted ranges on
-  the Calendar (the `predicted` style already exists in `periodConfig.ts`) and feed the Home dashboard.
+**▶ Resume here — next is build-sequence steps 8–9:**
+- **Step 8:** `components/notes/NotesList.tsx` (domain-agnostic, `domain` filter prop) + the Notes/
+  Journal screen + the day-detail bottom sheet shared from the Calendar (tech spec §5.7).
+- **Step 9:** the Insights screen with Recharts (tech spec §5.6) — stat cards + an irregularity
+  summary generated from the same `periodInsights` logic as the dashboard flag.
 
 **To run locally** (full steps in `HOW_TO_RUN.md`): `corepack pnpm exec supabase start`, then
 `corepack pnpm dev` → http://localhost:3000. `.env.local` already holds the local keys.

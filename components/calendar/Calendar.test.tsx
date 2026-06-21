@@ -53,4 +53,25 @@ describe("Calendar", () => {
     render(<Harness onRangeComplete={vi.fn()} />);
     expect(screen.getByText("June 2026")).toBeInTheDocument();
   });
+
+  it("calls onEntryTap (not onRangeComplete) when tapping a day inside an existing entry", async () => {
+    const user = userEvent.setup();
+    const onRangeComplete = vi.fn();
+    const onEntryTap = vi.fn();
+    render(
+      <Calendar
+        entries={[{ id: "abc", startDate: "2026-06-10", endDate: "2026-06-12", styleKey: "logged" }]}
+        config={config}
+        selection={null}
+        onSelectionChange={vi.fn()}
+        onRangeComplete={onRangeComplete}
+        onEntryTap={onEntryTap}
+        today="2026-06-20"
+      />,
+    );
+
+    await user.click(screen.getByLabelText("2026-06-11"));
+    expect(onEntryTap).toHaveBeenCalledWith("abc");
+    expect(onRangeComplete).not.toHaveBeenCalled();
+  });
 });

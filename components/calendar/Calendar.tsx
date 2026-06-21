@@ -21,6 +21,10 @@ type CalendarProps = {
   selection: Selection | null;
   onSelectionChange: (selection: Selection | null) => void;
   onRangeComplete: (start: ISODate, end: ISODate) => void;
+  /** Tapping a day covered by an existing entry calls this with that entry's id
+   *  (instead of starting a selection). The component stays domain-agnostic — it's
+   *  up to the caller to decide which entries are editable. */
+  onEntryTap?: (entryId: string) => void;
   weekStartsOn?: number;
   /** Inclusive latest selectable date. Later days are shown but not tappable. Defaults to `today`. */
   maxDate?: ISODate;
@@ -42,6 +46,7 @@ export function Calendar({
   selection,
   onSelectionChange,
   onRangeComplete,
+  onEntryTap,
   weekStartsOn = 0,
   maxDate,
   today = todayISO(),
@@ -55,8 +60,13 @@ export function Calendar({
   const weeks = buildMonthGrid(view.year, view.monthIndex, weekStartsOn);
   const labels = weekdayLabels(weekStartsOn);
 
-  function handleTap(iso: ISODate) {
+  function handleTap(iso: ISODate, entryId?: string) {
     if (iso > max) return; // a period can't be logged in the future
+    // A tap on an existing entry edits it rather than starting a new selection.
+    if (entryId && onEntryTap) {
+      onEntryTap(entryId);
+      return;
+    }
     const { selection: next, completed } = nextSelection(selection, iso);
     onSelectionChange(next);
     if (completed) onRangeComplete(completed.start, completed.end);
@@ -112,7 +122,7 @@ export function Calendar({
               aria-label={cell.iso}
               aria-pressed={selPos != null}
               disabled={!interactive}
-              onClick={() => handleTap(cell.iso)}
+              onClick={() => handleTap(cell.iso, entry?.e.id)}
               className="relative flex h-11 items-center justify-center disabled:cursor-default"
             >
               {entry?.pos && (
